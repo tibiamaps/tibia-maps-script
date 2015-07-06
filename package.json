@@ -1,0 +1,46 @@
+{
+  "name": "tibia-maps",
+  "version": "0.0.0",
+  "description": "A command-line utility to convert between binary Tibia maps and human-readable forms of the map data.",
+  "homepage": "https://mths.be/tibiamaps",
+  "main": "bin/cli.js",
+  "bin": "bin/cli.js",
+  "keywords": [
+    "data",
+    "mmorpg",
+    "tibia",
+    "tibia-maps"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Mathias Bynens",
+    "url": "https://mathiasbynens.be/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tibiamaps/tibia-maps-script.git"
+  },
+  "bugs": "https://github.com/tibiamaps/tibia-maps-script/issues",
+  "files": [
+    "LICENSE-MIT.txt",
+    "bin/",
+    "src/"
+  ],
+  "directories": {
+    "bin": "bin",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./test/test.sh"
+  },
+  "dependencies": {
+    "argh": "^0.1.4",
+    "canvas": "^1.2.3",
+    "glob": "^5.0.12",
+    "lodash.padleft": "^3.1.1",
+    "lodash.range": "^3.0.1",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.4.1",
+    "sort-object": "^2.0.2"
+  }
+}
