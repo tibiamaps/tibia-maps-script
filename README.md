@@ -10,6 +10,12 @@
 npm install -g tibia-maps
 ```
 
+If you’re on OS X and you’re getting [an error about `xcb-shm`](https://github.com/Automattic/node-canvas/pull/541), try this instead:
+
+```sh
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/X11/lib/pkgconfig"; npm install -g tibia-maps
+```
+
 ## Usage
 
 ### `*.map` → `*.png` + `*.json`
@@ -31,3 +37,9 @@ tibia-maps --from-data=./data --output-dir=./Automap-new
 ```
 
 The output is saved in the `Automap-new` directory.
+
+## Author
+
+| [![twitter/mathias](https://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter") |
+|---|
+| [Mathias Bynens](https://mathiasbynens.be/) |
