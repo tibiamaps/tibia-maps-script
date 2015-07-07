@@ -23,6 +23,8 @@ const emptyDirectory = function(path) {
 };
 
 const main = function() {
+	const excludeMarkers = argv['markers'] === false;
+
 	if (!argv['from-maps'] && !argv['from-data']) {
 		console.log('Missing `--from-maps` or `--from-data` flag.');
 		return process.exit(1);
@@ -47,7 +49,7 @@ const main = function() {
 		emptyDirectory(dataDirectory).then(function() {
 			return generateBounds(mapsDirectory, dataDirectory);
 		}).then(function(bounds) {
-			return convertFromMaps(bounds, mapsDirectory, dataDirectory);
+			return convertFromMaps(bounds, mapsDirectory, dataDirectory, !excludeMarkers);
 		});
 		return;
 	}
@@ -64,7 +66,7 @@ const main = function() {
 		}
 		const outputDirectory = path.resolve(argv['output-dir']);
 		emptyDirectory(outputDirectory).then(function() {
-			convertToMaps(dataDirectory, outputDirectory);
+			convertToMaps(dataDirectory, outputDirectory, !excludeMarkers);
 		});
 		return;
 	}

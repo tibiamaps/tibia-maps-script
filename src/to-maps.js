@@ -84,7 +84,7 @@ const createBinaryMarkers = function(floorID) {
 	});
 };
 
-const convertToMaps = function(dataDirectory, mapsDirectory) {
+const convertToMaps = function(dataDirectory, mapsDirectory, includeMarkers) {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
@@ -101,7 +101,9 @@ const convertToMaps = function(dataDirectory, mapsDirectory) {
 	handleSequence(floorIDs, createBinaryMap).then(function() {
 		return handleSequence(floorIDs, createBinaryPath);
 	}).then(function() {
-		return handleSequence(floorIDs, createBinaryMarkers);
+		if (includeMarkers) {
+			return handleSequence(floorIDs, createBinaryMarkers);
+		}
 	}).then(function() {
 		Object.keys(RESULTS).forEach(function(id) {
 			const data = RESULTS[id];
@@ -109,7 +111,7 @@ const convertToMaps = function(dataDirectory, mapsDirectory) {
 			const buffer = Buffer.concat([
 				data.mapBuffer,
 				data.pathBuffer,
-				data.markerBuffer || noMarkersBuffer
+				includeMarkers ? data.markerBuffer || noMarkersBuffer : noMarkersBuffer
 			]);
 			const fileName = `${mapsDirectory}/${id}.map`;
 			const writeStream = fs.createWriteStream(fileName);

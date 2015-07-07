@@ -3,7 +3,9 @@ Automap
 Automap-new
 data
 test/data
+test/data-without-markers
 test/maps-new
+test/maps-new-without-markers
 
 # Installed npm modules
 node_modules

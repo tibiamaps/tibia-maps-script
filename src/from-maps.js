@@ -147,7 +147,7 @@ const parseMarkerData = function(buffer) {
 	return markers;
 };
 
-const drawMapSection = function(fileName) {
+const drawMapSection = function(fileName, includeMarkers) {
 	return new Promise(function(resolve, reject) {
 
 		const id = path.basename(fileName, '.map');
@@ -193,10 +193,13 @@ const drawMapSection = function(fileName) {
 				console.log(`printf '\\0\\0\\0\\0' >> ${fileName}`);
 			}
 
-			const results = parseMarkerData(markerData);
-			if (results.length) {
-				markers[id] = results;
+			if (includeMarkers) {
+				const results = parseMarkerData(markerData);
+				if (results.length) {
+					markers[id] = results;
+				}
 			}
+
 			resolve();
 
 		});
@@ -204,7 +207,7 @@ const drawMapSection = function(fileName) {
 	});
 };
 
-const renderFloor = function(floorID, mapDirectory, dataDirectory) {
+const renderFloor = function(floorID, mapDirectory, dataDirectory, includeMarkers) {
 	console.log(`Rendering floor ${floorID}…`);
 	return new Promise(function(resolve, reject) {
 		const unexplored = colors.byByte['0'];
@@ -216,7 +219,9 @@ const renderFloor = function(floorID, mapDirectory, dataDirectory) {
 		resetMarkers();
 		glob(`${mapDirectory}/*${floorID}.map`, function(error, files) {
 			// Handle all map files for this floor sequentially.
-			handleSequence(files, drawMapSection).then(function() {
+			handleSequence(files, function(fileName) {
+				return drawMapSection(fileName, includeMarkers);
+			}).then(function() {
 				return saveCanvasToPNG(
 					`${dataDirectory}/floor-${floorID}-map.png`,
 					GLOBALS.mapCanvas
@@ -229,7 +234,7 @@ const renderFloor = function(floorID, mapDirectory, dataDirectory) {
 			}).then(function() {
 				return writeJSON(
 					`${dataDirectory}/floor-${floorID}-markers.json`,
-					markers
+					includeMarkers ? markers : {}
 				);
 			}).then(function() {
 				resolve();
@@ -241,7 +246,7 @@ const renderFloor = function(floorID, mapDirectory, dataDirectory) {
 	});
 };
 
-const convertFromMaps = function(bounds, mapDirectory, dataDirectory) {
+const convertFromMaps = function(bounds, mapDirectory, dataDirectory, includeMarkers) {
 	GLOBALS.bounds = bounds;
 	GLOBALS.mapCanvas = new Canvas(bounds.width, bounds.height);
 	GLOBALS.mapContext = GLOBALS.mapCanvas.getContext('2d');
@@ -254,7 +259,7 @@ const convertFromMaps = function(bounds, mapDirectory, dataDirectory) {
 		dataDirectory = 'data';
 	}
 	handleSequence(bounds.floorIDs, function(floorID) {
-		return renderFloor(floorID, mapDirectory, dataDirectory);
+		return renderFloor(floorID, mapDirectory, dataDirectory, includeMarkers);
 	});
 };
 
