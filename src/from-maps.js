@@ -37,12 +37,18 @@ Object.keys(colors.byByte).forEach(function(pixelByte) {
 
 const pathPixelPalette = {};
 for (const pixelByte of range(0, 255 + 1)) {
+	const isUnexplored = pixelByte == 0xFA;
 	const component = 0xFF - pixelByte;
+	const color = isUnexplored ? colors.unexploredPath : {
+		'r': component,
+		'g': component,
+		'b': component
+	};
 	const imageData = pixelContext.createImageData(1, 1);
 	const data = imageData.data;
-	data[0] = component;
-	data[1] = component;
-	data[2] = component;
+	data[0] = color.r;
+	data[1] = color.g;
+	data[2] = color.b;
 	data[3] = 0xFF;
 	pathPixelPalette[pixelByte] = imageData;
 }
@@ -178,8 +184,9 @@ const drawMapSection = function(fileName, includeMarkers) {
 
 			// The next 0x10000 bytes form the map that is used for pathfinding. Each
 			// of these 256×256 bytes represents the walking speed on a specific tile.
-			// 0 = unexplored/unknown
-			// 1–254: the lower the value, the higher your movement speed on that tile
+			// In general, the lower the value, the higher your movement speed on that
+			// tile. There are two known constants:
+			// 250 = unexplored/unknown
 			// 255 = non-walkable
 			const pathData = buffer.slice(0x10000, 0x20000);
 			parsePathData(pathData, xOffset, yOffset); // changes global state
@@ -210,12 +217,16 @@ const drawMapSection = function(fileName, includeMarkers) {
 const renderFloor = function(floorID, mapDirectory, dataDirectory, includeMarkers) {
 	console.log(`Rendering floor ${floorID}…`);
 	return new Promise(function(resolve, reject) {
-		const unexplored = colors.byByte['0'];
+		const unexploredMap = colors.unexploredMap;
 		resetContext(
 			GLOBALS.mapContext,
-			`rgb(${unexplored.r}, ${unexplored.g}, ${unexplored.b}`
+			`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
 		);
-		resetContext(GLOBALS.pathContext, '#000');
+		const unexploredPath = colors.unexploredPath;
+		resetContext(
+			GLOBALS.pathContext,
+			`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
+		);
 		resetMarkers();
 		glob(`${mapDirectory}/*${floorID}.map`, function(error, files) {
 			// Handle all map files for this floor sequentially.

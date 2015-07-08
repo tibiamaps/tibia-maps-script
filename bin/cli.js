@@ -11,6 +11,7 @@ const rimraf = require('rimraf');
 const convertFromMaps = require('../src/from-maps.js');
 const convertToMaps = require('../src/to-maps.js');
 const generateBounds = require('../src/generate-bounds.js');
+const info = require('../package.json');
 
 const emptyDirectory = function(path) {
 	return new Promise(function(resolve, reject) {
@@ -24,6 +25,14 @@ const emptyDirectory = function(path) {
 
 const main = function() {
 	const excludeMarkers = argv['markers'] === false;
+
+	if (process.argv.length == 2) {
+		console.log(`${info.name} v${info.version} - ${info.homepage}`);
+		console.log('\nUsage:\n');
+		console.log(`\t${info.name} --from-maps=./Automap --output-dir=./data`);
+		console.log(`\t${info.name} --from-data=./data --output-dir=./Automap --no-markers`);
+		process.exit(1);
+	}
 
 	if (!argv['from-maps'] && !argv['from-data']) {
 		console.log('Missing `--from-maps` or `--from-data` flag.');

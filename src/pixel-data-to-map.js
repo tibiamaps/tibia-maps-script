@@ -1,8 +1,10 @@
 'use strict';
 
 const colors = require('./colors.js');
+const unexploredMapByte = 0x00;
 
 const pixelDataToMapBuffer = function(data) {
+	let hasData = false;
 	const buffer = new Buffer(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
@@ -22,9 +24,12 @@ const pixelDataToMapBuffer = function(data) {
 			const byteValue = colors.byColor[id];
 			console.assert(byteValue != null);
 			buffer.writeUInt8(byteValue, ++bufferIndex);
+			if (byteValue != unexploredMapByte) {
+				hasData = true;
+			}
 		}
 	}
-	return buffer;
+	return hasData && buffer;
 };
 
 module.exports = pixelDataToMapBuffer;

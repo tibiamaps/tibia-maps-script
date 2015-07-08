@@ -29,6 +29,8 @@ Object.keys(byByte).forEach(function(key) {
 });
 
 module.exports = {
+	'unexploredMap': byByte[0x00],
+	'unexploredPath': byByte[0x33],
 	'byByte': byByte,
 	'byColor': byColor
 };

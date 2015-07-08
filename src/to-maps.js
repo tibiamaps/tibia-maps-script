@@ -41,7 +41,9 @@ const forEachTile = function(map, callback, name, floorID) {
 			const pixels = globals.context.getImageData(xOffset, yOffset, 256, 256);
 			const buffer = callback(pixels.data);
 			const id = `${xID}${yID}${floorID}`;
-			addResult(id, name, buffer);
+			if (buffer) {
+				addResult(id, name, buffer);
+			}
 			xOffset += 256;
 		}
 		yOffset += 256;

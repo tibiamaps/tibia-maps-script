@@ -1,6 +1,11 @@
 'use strict';
 
+const colors = require('./colors.js');
+const unexploredPath = colors.unexploredPath;
+const unexploredPathByte = 0xFA;
+
 const pixelDataToPathBuffer = function(data) {
+	let hasData = false;
 	const buffer = new Buffer(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
@@ -15,15 +20,25 @@ const pixelDataToPathBuffer = function(data) {
 			const b = data[offset + 2];
 			// Discard alpha channel data; it’s always 0xFF anyway.
 			//const a = data[offset + 3];
-			// Verify that `r, `g`, and `b` are equal.
-			console.assert(r == g);
-			console.assert(r == b);
-			// Get the byte value that corresponds to this color.
-			const byteValue = 0xFF - r;
+			let byteValue;
+			if (
+				r == unexploredPath.r &&
+				b == unexploredPath.b &&
+				g == unexploredPath.g
+			) {
+				byteValue = 0xFA;
+			} else {
+				// Verify that `r, `g`, and `b` are equal.
+				console.assert(r == g);
+				console.assert(r == b);
+				hasData = true;
+				// Get the byte value that corresponds to this color.
+				byteValue = 0xFF - r;
+			}
 			buffer.writeUInt8(byteValue, ++bufferIndex);
 		}
 	}
-	return buffer;
+	return hasData && buffer;
 };
 
 module.exports = pixelDataToPathBuffer;
