@@ -73,9 +73,9 @@ const main = function() {
 			console.log('`--output-dir` path not specified. Using the default, i.e. `Automap-new`.');
 			argv['output-dir'] = 'Automap-new';
 		}
-		const outputDirectory = path.resolve(argv['output-dir']);
-		emptyDirectory(outputDirectory).then(function() {
-			convertToMaps(dataDirectory, outputDirectory, !excludeMarkers);
+		const mapsDirectory = path.resolve(argv['output-dir']);
+		emptyDirectory(mapsDirectory).then(function() {
+			convertToMaps(dataDirectory, mapsDirectory, !excludeMarkers);
 		});
 		return;
 	}
