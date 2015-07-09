@@ -59,46 +59,36 @@ const resetMarkers = function() {
 	markers = {};
 };
 
-const parseMapData = function(buffer, xOffset, yOffset) {
-	// TODO: instead of passing in xOffset/yOffset and using them in here,
-	// this function should just render a 256×256px image as ImageData and return
-	// it. Then the outer function can position it.
-	// Note: the map data first contains the 256 pixels in the first column, then
-	// the 256 pixels in the second column, etc. I.e. the pixels go from top to
-	// bottom, rather than from left to right.
+const renderMap = function(buffer) {
+	const canvas = new Canvas(256, 256);
+	const context = canvas.getContext('2d');
 	let xIndex = -1;
 	let bufferIndex = -1;
 	while (++xIndex < 256) {
 		let yIndex = -1;
 		while (++yIndex < 256) {
 			const pixelByte = buffer[++bufferIndex];
-			GLOBALS.mapContext.putImageData(
-				mapPixelPalette[pixelByte],
-				xOffset + xIndex,
-				yOffset + yIndex
-			);
+			context.putImageData(mapPixelPalette[pixelByte], xIndex, yIndex);
 		}
 	}
+	const imageData = context.getImageData(0, 0, 256, 256);
+	return imageData;
 };
 
-const parsePathData = function(buffer, xOffset, yOffset) {
-	// TODO: instead of passing in xOffset/yOffset and using them in here,
-	// this function should just render a 256×256px image as ImageData and return
-	// it (or even return an image buffer). Then the outer function can position
-	// it.
+const renderPath = function(buffer) {
+	const canvas = new Canvas(256, 256);
+	const context = canvas.getContext('2d');
 	let xIndex = -1;
 	let bufferIndex = -1;
 	while (++xIndex < 256) {
 		let yIndex = -1;
 		while (++yIndex < 256) {
 			const pixelByte = buffer[++bufferIndex];
-			GLOBALS.pathContext.putImageData(
-				pathPixelPalette[pixelByte],
-				xOffset + xIndex,
-				yOffset + yIndex
-			);
+			context.putImageData(pathPixelPalette[pixelByte], xIndex, yIndex);
 		}
 	}
+	const imageData = context.getImageData(0, 0, 256, 256);
+	return imageData;
 };
 
 const parseMarkerData = function(buffer) {
@@ -140,10 +130,8 @@ const parseMarkerData = function(buffer) {
 		const descriptionLength = buffer.readUIntLE(index, 2);
 		index += 2;
 
-		// Read the string, i.e. the marker’s description. Note: adding an in-game
-		// marker with “Iñtërnâtiônàlizætiøn☃💩” as its description results in
-		// “Iñtërnâtiônàlizætiøn☃???”, i.e. astral Unicode symbols don’t seem to be
-		// supported.
+		// Read the string, i.e. the marker’s description. Only symbols that can be
+		// represented using the windows-1252 encoding are supported.
 		const descriptionBuffer = buffer.slice(index, index + descriptionLength);
 		index += descriptionLength;
 		marker.description = windows1252.decode(
@@ -161,7 +149,7 @@ const drawMapSection = function(fileName, includeMarkers) {
 
 		const id = path.basename(fileName, '.map');
 		if (id == '13112807') {
-			// `13112807.map` is the hacked map TibiaMaps.org file containing
+			// `13112807.map` is the hacked TibiaMaps.org map file containing
 			// impossible color values that break the script because it intentionally
 			// doesn’t support non-standard color values.
 			// https://i.imgur.com/GPBwhL7.png
@@ -183,7 +171,8 @@ const drawMapSection = function(fileName, includeMarkers) {
 			// The first 0x10000 (256×256) bytes of the map file form the graphical
 			// portion of the map. Each byte represents a single visible map pixel.
 			const mapData = buffer.slice(0, 0x10000);
-			parseMapData(mapData, xOffset, yOffset); // changes global state
+			const mapImageData = renderMap(mapData);
+			GLOBALS.mapContext.putImageData(mapImageData, xOffset, yOffset);
 
 			// The next 0x10000 bytes form the map that is used for pathfinding. Each
 			// of these 256×256 bytes represents the walking speed on a specific tile.
@@ -192,7 +181,8 @@ const drawMapSection = function(fileName, includeMarkers) {
 			// 250 = unexplored/unknown
 			// 255 = non-walkable
 			const pathData = buffer.slice(0x10000, 0x20000);
-			parsePathData(pathData, xOffset, yOffset); // changes global state
+			const pathImageData = renderPath(pathData);
+			GLOBALS.pathContext.putImageData(pathImageData, xOffset, yOffset);
 
 			// The remaining bytes are map marker data.
 			const markerData = buffer.slice(0x20000);

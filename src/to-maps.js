@@ -13,7 +13,7 @@ const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
 const arrayToMarkerBuffer = require('./array-to-marker.js');
 
-const globals = {};
+const GLOBALS = {};
 
 const RESULTS = {};
 const addResult = function(id, type, result) {
@@ -25,10 +25,10 @@ const addResult = function(id, type, result) {
 };
 
 const forEachTile = function(map, callback, name, floorID) {
-	const bounds = globals.bounds;
+	const bounds = GLOBALS.bounds;
 	const image = new Image();
 	image.src = map;
-	globals.context.drawImage(image, 0, 0, bounds.width, bounds.height);
+	GLOBALS.context.drawImage(image, 0, 0, bounds.width, bounds.height);
 	// Extract each 256×256px tile.
 	let yOffset = 0;
 	while (yOffset < bounds.height) {
@@ -38,7 +38,7 @@ const forEachTile = function(map, callback, name, floorID) {
 		while (xOffset < bounds.width) {
 			const x = bounds.xMin + (xOffset / 256);
 			const xID = padLeft(x, 3, '0');
-			const pixels = globals.context.getImageData(xOffset, yOffset, 256, 256);
+			const pixels = GLOBALS.context.getImageData(xOffset, yOffset, 256, 256);
 			const buffer = callback(pixels.data);
 			const id = `${xID}${yID}${floorID}`;
 			if (buffer) {
@@ -52,7 +52,7 @@ const forEachTile = function(map, callback, name, floorID) {
 
 const createBinaryMap = function(floorID) {
 	return new Promise(function(resolve, reject) {
-		fs.readFile(`${globals.dataDirectory}/floor-${floorID}-map.png`, function(error, map) {
+		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, function(error, map) {
 			if (error) {
 				throw new Error(error);
 			}
@@ -64,7 +64,7 @@ const createBinaryMap = function(floorID) {
 
 const createBinaryPath = function(floorID) {
 	return new Promise(function(resolve, reject) {
-		fs.readFile(`${globals.dataDirectory}/floor-${floorID}-path.png`, function(error, map) {
+		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, function(error, map) {
 			if (error) {
 				throw new Error(error);
 			}
@@ -76,7 +76,7 @@ const createBinaryPath = function(floorID) {
 
 const createBinaryMarkers = function(floorID) {
 	return new Promise(function(resolve, reject) {
-		const data = require(`${globals.dataDirectory}/floor-${floorID}-markers.json`);
+		const data = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
 		Object.keys(data).forEach(function(id) {
 			const markers = data[id];
 			const markerBuffer = arrayToMarkerBuffer(markers);
@@ -93,12 +93,12 @@ const convertToMaps = function(dataDirectory, mapsDirectory, includeMarkers) {
 	if (!mapsDirectory) {
 		mapsDirectory = 'Automap-new';
 	}
-	globals.dataDirectory = dataDirectory;
-	globals.mapsDirectory = mapsDirectory;
+	GLOBALS.dataDirectory = dataDirectory;
+	GLOBALS.mapsDirectory = mapsDirectory;
 	const bounds = JSON.parse(fs.readFileSync(`${dataDirectory}/bounds.json`));
-	globals.bounds = bounds;
-	globals.canvas = new Canvas(bounds.width, bounds.height);
-	globals.context = globals.canvas.getContext('2d');
+	GLOBALS.bounds = bounds;
+	GLOBALS.canvas = new Canvas(bounds.width, bounds.height);
+	GLOBALS.context = GLOBALS.canvas.getContext('2d');
 	const floorIDs = bounds.floorIDs;
 	handleSequence(floorIDs, createBinaryMap).then(function() {
 		return handleSequence(floorIDs, createBinaryPath);
@@ -107,9 +107,9 @@ const convertToMaps = function(dataDirectory, mapsDirectory, includeMarkers) {
 			return handleSequence(floorIDs, createBinaryMarkers);
 		}
 	}).then(function() {
+		const noMarkersBuffer = new Buffer([0x0, 0x0, 0x0, 0x0]);
 		Object.keys(RESULTS).forEach(function(id) {
 			const data = RESULTS[id];
-			const noMarkersBuffer = new Buffer([0x0, 0x0, 0x0, 0x0]);
 			const buffer = Buffer.concat([
 				data.mapBuffer,
 				data.pathBuffer,
