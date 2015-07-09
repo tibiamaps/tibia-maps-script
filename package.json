@@ -1,6 +1,6 @@
 {
   "name": "tibia-maps",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A command-line utility to convert between binary Tibia maps and human-readable forms of the map data.",
   "homepage": "https://mths.be/tibiamaps",
   "main": "bin/cli.js",
