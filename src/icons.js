@@ -24,7 +24,7 @@ const byID = {
 const byName = {};
 Object.keys(byID).forEach(function(id) {
 	const name = byID[id];
-	byName[name] = id;
+	byName[name] = Number(id);
 });
 
 module.exports = {
