@@ -1,5 +1,7 @@
 'use strict';
 
+const windows1252 = require('windows-1252');
+
 const icons = require('./icons.js');
 
 const arrayToMarkerBuffer = function(array) {
@@ -17,7 +19,12 @@ const arrayToMarkerBuffer = function(array) {
 		console.assert(iconByte != null);
 		markerBuffer.writeUIntLE(iconByte, 0x8, 4);
 		markerBuffer.writeUIntLE(marker.description.length, 0xC, 2);
-		markerBuffer.write(marker.description, 0xE, marker.description.length, 'ascii');
+		markerBuffer.write(
+			windows1252.encode(marker.description),
+			0xE,
+			marker.description.length,
+			'binary'
+		);
 		result = Buffer.concat([result, markerBuffer]);
 	}
 	return result;

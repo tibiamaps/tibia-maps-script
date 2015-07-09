@@ -41,6 +41,7 @@
     "lodash.range": "^3.0.1",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.4.1",
-    "sort-object": "^2.0.2"
+    "sort-object": "^2.0.2",
+    "windows-1252": "^0.1.2"
   }
 }

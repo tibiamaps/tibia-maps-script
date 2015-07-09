@@ -8,6 +8,7 @@ const Canvas = require('canvas');
 const Image = Canvas.Image;
 const range = require('lodash.range');
 const sortObject = require('sort-object');
+const windows1252 = require('windows-1252');
 
 const GLOBALS = {};
 const resetContext = function(context, fillStyle) {
@@ -145,7 +146,9 @@ const parseMarkerData = function(buffer) {
 		// supported.
 		const descriptionBuffer = buffer.slice(index, index + descriptionLength);
 		index += descriptionLength;
-		marker.description = descriptionBuffer.toString('binary');
+		marker.description = windows1252.decode(
+			descriptionBuffer.toString('binary')
+		);
 
 		const sorted = sortObject(marker);
 		markers.push(sorted);
