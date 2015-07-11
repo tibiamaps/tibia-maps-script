@@ -49,12 +49,12 @@ const main = function() {
 			console.log('`--from-maps` path not specified. Using the default, i.e. `Automap`.');
 			argv['from-maps'] = 'Automap';
 		}
-		const mapsDirectory = path.resolve(argv['from-maps']);
+		const mapsDirectory = path.resolve(String(argv['from-maps']));
 		if (!argv['output-dir'] || argv['output-dir'] === true) {
 			console.log('`--output-dir` path not specified. Using the default, i.e. `data`.');
 			argv['output-dir'] = 'data';
 		}
-		const dataDirectory = path.resolve(argv['output-dir']);
+		const dataDirectory = path.resolve(String(argv['output-dir']));
 		emptyDirectory(dataDirectory).then(function() {
 			return generateBounds(mapsDirectory, dataDirectory);
 		}).then(function(bounds) {
@@ -73,7 +73,7 @@ const main = function() {
 			console.log('`--output-dir` path not specified. Using the default, i.e. `Automap-new`.');
 			argv['output-dir'] = 'Automap-new';
 		}
-		const mapsDirectory = path.resolve(argv['output-dir']);
+		const mapsDirectory = path.resolve(String(argv['output-dir']));
 		emptyDirectory(mapsDirectory).then(function() {
 			convertToMaps(dataDirectory, mapsDirectory, !excludeMarkers);
 		});
