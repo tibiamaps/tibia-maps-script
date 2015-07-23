@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "argh": "^0.1.4",
-    "canvas": "^1.2.3",
+    "canvas": "1.2.3",
     "glob": "^5.0.12",
     "lodash.padleft": "^3.1.1",
     "lodash.range": "^3.0.1",
