@@ -4,7 +4,7 @@
 
 ## Installation
 
-**Note:** [io.js](https://iojs.org/en/) is required.
+**Note:** [Node.js v4+](https://nodejs.org/en/) is required.
 
 ```sh
 npm install -g tibia-maps
