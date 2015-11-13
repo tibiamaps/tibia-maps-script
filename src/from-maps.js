@@ -141,6 +141,10 @@ const parseMarkerData = function(buffer) {
 		const sorted = sortObject(marker);
 		markers.push(sorted);
 	}
+	markers.sort(function(a, b) {
+		return (a.xPosition * 1000 + a.yPosition) -
+			(b.xPosition * 1000 + b.yPosition);
+	});
 	return markers;
 };
 
