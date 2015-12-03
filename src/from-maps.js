@@ -145,7 +145,15 @@ const parseMarkerData = function(buffer) {
 		return (a.xPosition * 1000 + a.yPosition) -
 			(b.xPosition * 1000 + b.yPosition);
 	});
-	return markers;
+	// Remove duplicate markers.
+	const set = new Set();
+	const uniqueMarkers = markers.filter(function(marker) {
+		const serialized = JSON.stringify(marker).toLowerCase();
+		const isDuplicate = set.has(serialized);
+		set.add(serialized);
+		return !isDuplicate;
+	});
+	return uniqueMarkers;
 };
 
 const drawMapSection = function(fileName, includeMarkers) {
