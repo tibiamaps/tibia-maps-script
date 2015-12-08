@@ -18,6 +18,16 @@ const arrayToMarkerBuffer = function(array) {
 		const iconByte = icons.byName[marker.icon];
 		console.assert(iconByte != null);
 		markerBuffer.writeUIntLE(iconByte, 0x8, 4);
+		// Marker descriptions are limited to 99 bytes. Since only symbols that can
+		// be represented in the windows-1252 encoding may be used, this equals
+		// exactly 99 such symbols.
+		// When viewed in the client, markers with descriptions exceeding 99 bytes
+		// are truncated, and the map file is updated with the truncated marker
+		// description.
+		console.assert(
+			marker.description.length <= 99,
+			'Marker description should be 99 symbols or fewer'
+		);
 		markerBuffer.writeUIntLE(marker.description.length, 0xC, 2);
 		markerBuffer.write(
 			windows1252.encode(marker.description),
