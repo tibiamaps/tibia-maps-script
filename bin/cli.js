@@ -34,6 +34,11 @@ const main = function() {
 		process.exit(1);
 	}
 
+	if (argv['v'] || argv['version']) {
+		console.log(`v${info.version}`);
+		return process.exit(0);
+	}
+
 	if (!argv['from-maps'] && !argv['from-data']) {
 		console.log('Missing `--from-maps` or `--from-data` flag.');
 		return process.exit(1);
