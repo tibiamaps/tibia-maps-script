@@ -5,13 +5,12 @@ const byByte = {
 	0x0C: { r: 0, g: 102, b: 0 }, // dark green (trees)
 	0x18: { r: 0, g: 204, b: 0 }, // green (grass)
 	0x1E: { r: 0, g: 255, b: 0 }, // light green (old swamp)
-	0x28: { r: 51, g: 0, b: 204 }, // blue (old water)
-	0x33: { r: 51, g: 102, b: 153 }, // light blue
+	0x33: { r: 51, g: 102, b: 153 }, // light blue (water)
 	0x56: { r: 102, g: 102, b: 102 }, // dark gray (stone/mountains)
 	0x72: { r: 153, g: 51, b: 0 }, // dark brown (earth/stalagmites)
 	0x79: { r: 153, g: 102, b: 51 }, // brown (earth)
 	0x81: { r: 153, g: 153, b: 153 }, // gray (floor)
-	0x8C: { r: 153, g: 255, b: 102 }, // light green
+	0x8C: { r: 153, g: 255, b: 102 }, // light green (light spots in grassy areas)
 	0xB3: { r: 204, g: 255, b: 255 }, // light blue (ice)
 	0xBA: { r: 255, g: 51, b: 0 }, // red (city/walls)
 	0xC0: { r: 255, g: 102, b: 0 }, // orange (lava)
@@ -28,8 +27,15 @@ Object.keys(byByte).forEach(function(key) {
 	byColor[id] = byteValue;
 });
 
+const unexploredMapByte = 0x00;
+const unexploredPathByte = 0xFA;
+
 module.exports = {
-	'unexploredMap': byByte[0x00],
+	'unexploredMapByte': unexploredMapByte,
+	'unexploredMap': byByte[unexploredMapByte],
+	'unexploredPathByte': unexploredPathByte,
+	// For the unexplored path color, we get to pick any color, not necessarily
+	// `byByte[unexploredPathByte]`. Watery blue looks nice.
 	'unexploredPath': byByte[0x33],
 	'byByte': byByte,
 	'byColor': byColor

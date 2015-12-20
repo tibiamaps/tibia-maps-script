@@ -2,10 +2,10 @@
 
 const colors = require('./colors.js');
 const unexploredPath = colors.unexploredPath;
-const unexploredPathByte = 0xFA;
+const unexploredPathByte = colors.unexploredPathByte;
 
-const pixelDataToPathBuffer = function(data) {
-	let hasData = false;
+const pixelDataToPathBuffer = function(data, isGroundFloor) {
+	let hasData = isGroundFloor;
 	const buffer = new Buffer(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
@@ -26,7 +26,7 @@ const pixelDataToPathBuffer = function(data) {
 				b == unexploredPath.b &&
 				g == unexploredPath.g
 			) {
-				byteValue = 0xFA;
+				byteValue = unexploredPathByte;
 			} else {
 				// Verify that `r, `g`, and `b` are equal.
 				console.assert(r == g);

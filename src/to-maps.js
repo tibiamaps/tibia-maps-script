@@ -25,6 +25,7 @@ const addResult = function(id, type, result) {
 };
 
 const forEachTile = function(map, callback, name, floorID) {
+	const isGroundFloor = floorID == '07';
 	const bounds = GLOBALS.bounds;
 	const image = new Image();
 	image.src = map;
@@ -39,7 +40,7 @@ const forEachTile = function(map, callback, name, floorID) {
 			const x = bounds.xMin + (xOffset / 256);
 			const xID = padLeft(x, 3, '0');
 			const pixels = GLOBALS.context.getImageData(xOffset, yOffset, 256, 256);
-			const buffer = callback(pixels.data);
+			const buffer = callback(pixels.data, isGroundFloor);
 			const id = `${xID}${yID}${floorID}`;
 			if (buffer) {
 				addResult(id, name, buffer);

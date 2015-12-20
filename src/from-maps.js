@@ -38,7 +38,7 @@ Object.keys(colors.byByte).forEach(function(pixelByte) {
 
 const pathPixelPalette = {};
 for (const pixelByte of range(0, 255 + 1)) {
-	const isUnexplored = pixelByte == 0xFA;
+	const isUnexplored = pixelByte == colors.unexploredPathByte;
 	const component = 0xFF - pixelByte;
 	const color = isUnexplored ? colors.unexploredPath : {
 		'r': component,
@@ -160,14 +160,6 @@ const drawMapSection = function(fileName, includeMarkers) {
 	return new Promise(function(resolve, reject) {
 
 		const id = path.basename(fileName, '.map');
-		if (id == '13112807') {
-			// `13112807.map` is the hacked TibiaMaps.org map file containing
-			// impossible color values that break the script because it intentionally
-			// doesn’t support non-standard color values.
-			// https://i.imgur.com/GPBwhL7.png
-			resolve();
-			return;
-		}
 		const x = Number(id.slice(0, 3));
 		const xOffset = (x - GLOBALS.bounds.xMin) * 256;
 		const y = Number(id.slice(3, 6));
