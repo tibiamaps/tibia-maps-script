@@ -110,16 +110,16 @@ const parseMarkerData = function(buffer) {
 		// The second byte is the map tile it is in on the `x` axis.
 		marker.xTile = buffer.readUInt8(index++, 1);
 		// The next two bytes are blank.
-		console.assert(index++, 0x0);
-		console.assert(index++, 0x0);
+		console.assert(index++, 0x00);
+		console.assert(index++, 0x00);
 
 		// The next byte is the `y` position.
 		marker.yPosition = buffer.readUInt8(index++, 1);
 		// The next byte is the map tile it is in on the `y` axis.
 		marker.yTile = buffer.readUInt8(index++, 1);
 		// The next two bytes are blank.
-		console.assert(index++, 0x0);
-		console.assert(index++, 0x0);
+		console.assert(index++, 0x00);
+		console.assert(index++, 0x00);
 
 		// The next 4 bytes are the image ID of the marker icon.
 		const id = buffer.readUIntLE(index, 4);

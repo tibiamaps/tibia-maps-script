@@ -108,7 +108,7 @@ const convertToMaps = function(dataDirectory, mapsDirectory, includeMarkers) {
 			return handleSequence(floorIDs, createBinaryMarkers);
 		}
 	}).then(function() {
-		const noMarkersBuffer = new Buffer([0x0, 0x0, 0x0, 0x0]);
+		const noMarkersBuffer = new Buffer([0x00, 0x00, 0x00, 0x00]);
 		Object.keys(RESULTS).forEach(function(id) {
 			const data = RESULTS[id];
 			const buffer = Buffer.concat([
