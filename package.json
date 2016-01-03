@@ -40,7 +40,7 @@
     "lodash.padleft": "^3.1.1",
     "lodash.range": "^3.0.1",
     "mkdirp": "^0.5.1",
-    "rimraf": "^2.4.4",
+    "rimraf": "^2.5.0",
     "sort-object": "^3.0.0",
     "windows-1252": "^0.1.2"
   }
