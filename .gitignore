@@ -1,6 +1,3 @@
-Automap
-!Automap/.gitignore
-Automap-new
 data
 test/data
 test/data-without-markers
