@@ -182,8 +182,8 @@ const drawMapSection = function(fileName, includeMarkers) {
 			// of these 256×256 bytes represents the walking speed on a specific tile.
 			// In general, the lower the value, the higher your movement speed on that
 			// tile. There are two known constants:
-			// 250 = unexplored/unknown
-			// 255 = non-walkable
+			// 0xFA = unexplored/unknown
+			// 0xFF = non-walkable
 			const pathData = buffer.slice(0x10000, 0x20000);
 			const pathImageData = renderPath(pathData);
 			GLOBALS.pathContext.putImageData(pathImageData, xOffset, yOffset);
