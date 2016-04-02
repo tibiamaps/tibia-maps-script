@@ -10,6 +10,7 @@ const rimraf = require('rimraf');
 
 const convertFromMaps = require('../src/from-maps.js');
 const convertToMaps = require('../src/to-maps.js');
+const convertToFlash = require('../src/to-flash.js');
 const generateBounds = require('../src/generate-bounds.js');
 const info = require('../package.json');
 
@@ -74,6 +75,16 @@ const main = function() {
 			argv['from-data'] = 'data';
 		}
 		const dataDirectory = path.resolve(argv['from-data']);
+
+		if (argv['flash'] === true) {
+			if (!argv['output-file'] || argv['output-file'] === true) {
+				console.log('`--output-file` path not specified.');
+				return process.exit(1);
+			}
+			convertToFlash(dataDirectory, argv['output-file'], !excludeMarkers);
+			return;
+		}
+
 		if (!argv['output-dir'] || argv['output-dir'] === true) {
 			console.log('`--output-dir` path not specified. Using the default, i.e. `Automap-new`.');
 			argv['output-dir'] = 'Automap-new';

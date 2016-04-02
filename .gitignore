@@ -3,6 +3,8 @@ test/data
 test/data-without-markers
 test/maps-new
 test/maps-new-without-markers
+test/flash/maps-with-markers.exp
+test/flash/maps-without-markers.exp
 
 # Installed npm modules
 node_modules

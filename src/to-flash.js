@@ -9,9 +9,11 @@ const padLeft = require('lodash.padleft');
 const handleSequence = require('./handle-sequence.js');
 const writeJSON = require('./write-json.js');
 
+const arrayToFlashMarkers = require('./array-to-flash-markers.js');
+const idToXyz = require('./id-to-xyz.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
-const arrayToMarkerBuffer = require('./array-to-marker.js');
+const transposeBuffer = require('./transpose-buffer.js');
 
 const GLOBALS = {};
 
@@ -80,22 +82,18 @@ const createBinaryMarkers = function(floorID) {
 		const data = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
 		Object.keys(data).forEach(function(id) {
 			const markers = data[id];
-			const markerBuffer = arrayToMarkerBuffer(markers);
-			addResult(id, 'markerBuffer', markerBuffer);
+			const flashMarkers = arrayToFlashMarkers(markers, floorID);
+			addResult(id, 'flashMarkers', flashMarkers);
 		});
 		resolve();
 	});
 };
 
-const convertToMaps = function(dataDirectory, mapsDirectory, includeMarkers) {
+const convertToFlash = function(dataDirectory, outputFile, includeMarkers) {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
-	if (!mapsDirectory) {
-		mapsDirectory = 'Automap-new';
-	}
 	GLOBALS.dataDirectory = dataDirectory;
-	GLOBALS.mapsDirectory = mapsDirectory;
 	const bounds = JSON.parse(fs.readFileSync(`${dataDirectory}/bounds.json`));
 	GLOBALS.bounds = bounds;
 	GLOBALS.canvas = new Canvas(bounds.width, bounds.height);
@@ -108,24 +106,26 @@ const convertToMaps = function(dataDirectory, mapsDirectory, includeMarkers) {
 			return handleSequence(floorIDs, createBinaryMarkers);
 		}
 	}).then(function() {
-		const noMarkersBuffer = new Buffer([0x00, 0x00, 0x00, 0x00]);
-		Object.keys(RESULTS).forEach(function(id) {
+		const lines = Object.keys(RESULTS).map(function(id) {
+			const coordinates = idToXyz(id);
 			const data = RESULTS[id];
-			const buffer = Buffer.concat([
-				data.mapBuffer,
-				data.pathBuffer,
-				includeMarkers ? data.markerBuffer || noMarkersBuffer : noMarkersBuffer
-			]);
-			const fileName = `${mapsDirectory}/${id}.map`;
-			const writeStream = fs.createWriteStream(fileName);
-			writeStream.write(buffer);
-			writeStream.end();
-			console.log(`${fileName} created successfully.`);
+			const entry = {
+				'colordata': transposeBuffer(data.mapBuffer).toString('base64'),
+				'mapmarkers': data.flashMarkers || [],
+				'waypoints': transposeBuffer(data.pathBuffer).toString('base64'),
+				'x': coordinates.x * 256,
+				'y': coordinates.y * 256,
+				'z': coordinates.z
+			};
+			return JSON.stringify(entry);
 		});
+		const contents = lines.join('\r\n') + '\r\n';
+		fs.writeFileSync(outputFile, contents);
+		console.log(`${outputFile} created successfully.`);
 	}).catch(function(exception) {
 		console.error(exception.stack);
 		reject(exception);
 	});
 };
 
-module.exports = convertToMaps;
+module.exports = convertToFlash;

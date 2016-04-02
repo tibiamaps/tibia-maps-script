@@ -10,6 +10,8 @@ const range = require('lodash.range');
 const sortObject = require('sort-object');
 const windows1252 = require('windows-1252');
 
+const idToXyz = require('./id-to-xyz.js');
+
 const GLOBALS = {};
 const resetContext = function(context, fillStyle) {
 	context.fillStyle = fillStyle;
@@ -160,11 +162,9 @@ const drawMapSection = function(fileName, includeMarkers) {
 	return new Promise(function(resolve, reject) {
 
 		const id = path.basename(fileName, '.map');
-		const x = Number(id.slice(0, 3));
-		const xOffset = (x - GLOBALS.bounds.xMin) * 256;
-		const y = Number(id.slice(3, 6));
-		const yOffset = (y - GLOBALS.bounds.yMin) * 256;
-		const z = Number(id.slice(6, 8));
+		const coordinates = idToXyz(id);
+		const xOffset = (coordinates.x - GLOBALS.bounds.xMin) * 256;
+		const yOffset = (coordinates.y - GLOBALS.bounds.yMin) * 256;
 
 		fs.readFile(fileName, function(error, buffer) {
 
