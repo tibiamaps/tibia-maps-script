@@ -1,5 +1,4 @@
 # Automatically normalize line endings for all text-based files.
 * text=auto
-# Don’t touch binary files.
-*.map binary
-*.exp binary
+# Ensure export files get CRLF line endings.
+*.exp text eol=crlf
