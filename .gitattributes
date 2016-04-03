@@ -1,2 +1,6 @@
-# Automatically normalize line endings for all text-based files
+# Automatically normalize line endings for all text-based files.
 * text=auto
+# Don’t touch binary files.
+#*.map binary
+#*.exp binary
+*.exp text eol=crlf

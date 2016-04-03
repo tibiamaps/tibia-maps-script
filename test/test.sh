@@ -34,7 +34,7 @@ for file in maps/*.map; do
 	[ -f "maps-new/${f}" ] || echo "Missing file: ${f}";
 	compare "maps/${f}" "maps-new/${f}";
 done;
-tibia-maps --from-data=data --output-file=flash/maps-with-markers.exp --flash;
+tibia-maps --from-data=data --flash-export-file=flash/maps-with-markers.exp;
 compare flash/maps-with-markers{,-expected}.exp;
 
 # Check if `--no-markers` skips importing the marker data.
@@ -46,7 +46,7 @@ if [ "$(tr -d '\n' <<< ${files_with_markers})" != "" ]; then
 	echo "${files_with_markers}";
 	exit 1;
 fi;
-tibia-maps --from-data=data-without-markers --output-file=flash/maps-without-markers.exp --flash --no-markers;
+tibia-maps --from-data=data-without-markers --flash-export-file=flash/maps-without-markers.exp --no-markers;
 compare flash/maps-without-markers{,-expected}.exp;
 
 # Check if `--no-markers` produces map files without any markers in them.
