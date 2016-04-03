@@ -8,6 +8,8 @@ const padLeft = require('lodash.padleft');
 
 const writeJSON = require('./write-json.js');
 
+const idToXyz = require('./id-to-xyz.js');
+
 const generateBounds = function(mapsDirectory, dataDirectory) {
 	return new Promise(function(resolve, reject) {
 		glob(`${mapsDirectory}/*.map`, function(error, files) {
@@ -22,9 +24,10 @@ const generateBounds = function(mapsDirectory, dataDirectory) {
 			const floorIDs = [];
 			for (const file of files) {
 				const id = path.basename(file);
-				const x = Number(id.slice(0, 3));
-				const y = Number(id.slice(3, 6));
-				const z = Number(id.slice(6, 8));
+				const coordinates = idToXyz(id);
+				const x = coordinates.x;
+				const y = coordinates.y;
+				const z = coordinates.z;
 				if (bounds.xMin > x) {
 					bounds.xMin = x;
 				}
