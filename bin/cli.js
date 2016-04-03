@@ -31,7 +31,7 @@ const main = function() {
 		console.log('\nUsage:\n');
 		console.log(`\t${info.name} --from-maps=./Automap --output-dir=./data`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./Automap --no-markers`);
-		console.log(`\t${info.name} --from-data=./data-without-markers --output-file=./flash/maps-without-markers.exp --flash --no-markers`);
+		console.log(`\t${info.name} --from-data=./data-without-markers --flash-export-file=./flash/maps-without-markers.exp --no-markers`);
 		process.exit(1);
 	}
 

@@ -21,6 +21,7 @@ function compare() {
 		cmp -l "${1}" "${2}" | \
 			gawk '{printf "%08X %02X %02X\n", $1, strtonum(0$2), strtonum(0$3)}' | \
 			head -n 5;
+		# Tip: use `vbindiff` when debugging locally.
 		exit 1;
 	fi;
 }
