@@ -150,10 +150,18 @@ const parseMarkerData = function(buffer, floor) {
 		const sorted = sortObject(marker);
 		markers.push(sorted);
 	}
+
+	// Sort markers so they start in the top left, then go from top to bottom.
+	// This matches the order of the keys in the root object, where e.g.
+	// `12412407` appears before `12412507` which appears before `12512407`.
+	// Example:
+	//     · 2 · 4 · · ·
+	//     1 · 3 · · · 7
+	//     · · · 5 · 6 ·
 	markers.sort(function(a, b) {
-		return (a.xPosition * 1000 + a.yPosition) -
-			(b.xPosition * 1000 + b.yPosition);
+		return (a.x * 100000 + a.y) - (b.x * 100000 + b.y);
 	});
+
 	// Remove duplicate markers.
 	const set = new Set();
 	const uniqueMarkers = markers.filter(function(marker) {
