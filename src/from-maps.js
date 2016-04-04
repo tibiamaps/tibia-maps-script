@@ -93,7 +93,7 @@ const renderPath = function(buffer) {
 	return imageData;
 };
 
-const parseMarkerData = function(buffer) {
+const parseMarkerData = function(buffer, floor) {
 	// https://tibiamaps.io/guides/map-file-format#map-marker-data
 	const markers = [];
 	let index = 0;
@@ -108,21 +108,27 @@ const parseMarkerData = function(buffer) {
 	// For each marker…
 	while (markers.length < markerCount) {
 		const marker = {};
-		// The first byte is the `x` position.
-		marker.xPosition = buffer.readUInt8(index++, 1);
+		// The first byte is the `x` offset within this 256×256px tile.
+		const xOffset = buffer.readUInt8(index++, 1);
 		// The second byte is the map tile it is in on the `x` axis.
-		marker.xTile = buffer.readUInt8(index++, 1);
+		const xTile = buffer.readUInt8(index++, 1);
+		marker.x = xTile * 256 + xOffset;
 		// The next two bytes are blank.
 		console.assert(index++, 0x00);
 		console.assert(index++, 0x00);
 
-		// The next byte is the `y` position.
-		marker.yPosition = buffer.readUInt8(index++, 1);
+		// The next byte is the `y` offset within this 256×256px tile.
+		const yOffset = buffer.readUInt8(index++, 1);
 		// The next byte is the map tile it is in on the `y` axis.
-		marker.yTile = buffer.readUInt8(index++, 1);
+		const yTile = buffer.readUInt8(index++, 1);
+		marker.y = yTile * 256 + yOffset;
 		// The next two bytes are blank.
 		console.assert(index++, 0x00);
 		console.assert(index++, 0x00);
+
+		// Include the floor number in the JSON data so that it doesn’t have to be
+		// inferred from the file name.
+		marker.z = floor;
 
 		// The next 4 bytes are the image ID of the marker icon.
 		const id = buffer.readUIntLE(index, 4);
@@ -202,7 +208,7 @@ const drawMapSection = function(fileName, includeMarkers) {
 			}
 
 			if (includeMarkers) {
-				const results = parseMarkerData(markerData);
+				const results = parseMarkerData(markerData, coordinates.z);
 				if (results.length) {
 					markers[id] = results;
 				}

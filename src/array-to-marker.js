@@ -9,11 +9,15 @@ const arrayToMarkerBuffer = function(array) {
 	result.writeUIntLE(array.length, 0, 4);
 	for (const marker of array) {
 		const markerBuffer = new Buffer(14 + marker.description.length);
-		markerBuffer.writeUInt8(marker.xPosition, 0);
-		markerBuffer.writeUInt8(marker.xTile, 1);
+		const xTile = Math.floor(marker.x / 256);
+		const xOffset = marker.x % 256;
+		markerBuffer.writeUInt8(xOffset, 0);
+		markerBuffer.writeUInt8(xTile, 1);
 		markerBuffer.write('\0\0', 2, 2, 'utf8');
-		markerBuffer.writeUInt8(marker.yPosition, 4);
-		markerBuffer.writeUInt8(marker.yTile, 5);
+		const yTile = Math.floor(marker.y / 256);
+		const yOffset = marker.y % 256;
+		markerBuffer.writeUInt8(yOffset, 4);
+		markerBuffer.writeUInt8(yTile, 5);
 		markerBuffer.write('\0\0', 6, 2, 'utf8');
 		const iconByte = icons.byName[marker.icon];
 		console.assert(iconByte != null);

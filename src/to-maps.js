@@ -85,7 +85,7 @@ const createBinaryMarkers = function(floorID) {
 			const markers = data[id];
 			const markerBuffer = arrayToMarkerBuffer(markers);
 			addResult(id, 'markerBuffer', markerBuffer);
-			const flashMarkers = arrayToFlashMarkers(markers, floorID);
+			const flashMarkers = arrayToFlashMarkers(markers);
 			addResult(id, 'flashMarkers', flashMarkers);
 		});
 		resolve();
