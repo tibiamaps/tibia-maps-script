@@ -4,6 +4,7 @@ const colors = require('./colors.js');
 const unexploredMapByte = colors.unexploredMapByte;
 
 const pixelDataToMapBuffer = function(data) {
+	// https://tibiamaps.io/guides/map-file-format#visual-map-data
 	let hasData = false;
 	const buffer = new Buffer(0x10000);
 	let bufferIndex = -1;

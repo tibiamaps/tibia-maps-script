@@ -114,6 +114,7 @@ const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlas
 	}).then(function() {
 		const noMarkersBuffer = new Buffer([0x00, 0x00, 0x00, 0x00]);
 		if (isFlash) {
+			// https://tibiamaps.io/guides/exp-file-format
 			const lines = Object.keys(RESULTS).map(function(id) {
 				const coordinates = idToXyz(id);
 				const data = RESULTS[id];

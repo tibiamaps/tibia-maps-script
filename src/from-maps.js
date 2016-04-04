@@ -94,6 +94,7 @@ const renderPath = function(buffer) {
 };
 
 const parseMarkerData = function(buffer) {
+	// https://tibiamaps.io/guides/map-file-format#map-marker-data
 	const markers = [];
 	let index = 0;
 	// The first 4 bytes indicate the number of markers on the map.
@@ -174,6 +175,7 @@ const drawMapSection = function(fileName, includeMarkers) {
 
 			// The first 0x10000 (256×256) bytes of the map file form the graphical
 			// portion of the map. Each byte represents a single visible map pixel.
+			// https://tibiamaps.io/guides/map-file-format#visual-map-data
 			const mapData = buffer.slice(0, 0x10000);
 			const mapImageData = renderMap(mapData);
 			GLOBALS.mapContext.putImageData(mapImageData, xOffset, yOffset);
@@ -184,11 +186,13 @@ const drawMapSection = function(fileName, includeMarkers) {
 			// tile. There are two known constants:
 			// 0xFA = unexplored/unknown
 			// 0xFF = non-walkable
+			// https://tibiamaps.io/guides/map-file-format#pathfinding-data
 			const pathData = buffer.slice(0x10000, 0x20000);
 			const pathImageData = renderPath(pathData);
 			GLOBALS.pathContext.putImageData(pathImageData, xOffset, yOffset);
 
 			// The remaining bytes are map marker data.
+			// https://tibiamaps.io/guides/map-file-format#map-marker-data
 			const markerData = buffer.slice(0x20000);
 			if (!markerData.length) {
 				// In the TibiaMaps.org package, `12712113.map` lacks the 4 null bytes
