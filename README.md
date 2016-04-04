@@ -40,7 +40,7 @@ The output is saved in the `Automap-new` directory.
 
 ### `*.png` + `*.json` → `*.exp`
 
-To generate Tibia Flash client–compatible `*.exp` files based on the PNGs and JSON files in the `data` directory, run:
+To generate [Tibia Flash client–compatible `*.exp` files](https://tibiamaps.io/guides/exp-file-format) based on the PNGs and JSON files in the `data` directory, run:
 
 ```sh
 tibia-maps --from-data=./data --flash-export-file=./maps.exp
