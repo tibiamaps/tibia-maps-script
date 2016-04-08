@@ -70,6 +70,8 @@ const renderMap = function(buffer) {
 		let yIndex = -1;
 		while (++yIndex < 256) {
 			const pixelByte = buffer[++bufferIndex];
+			const pixel = mapPixelPalette[pixelByte];
+			console.assert(pixel, `Unknown color ID: ${pixelByte}`);
 			context.putImageData(mapPixelPalette[pixelByte], xIndex, yIndex);
 		}
 	}
