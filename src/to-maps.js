@@ -11,6 +11,7 @@ const writeJSON = require('./write-json.js');
 
 const arrayToFlashMarkers = require('./array-to-flash-markers.js');
 const arrayToMarkerBuffer = require('./array-to-marker.js');
+const colors = require('./colors.js');
 const idToXyz = require('./id-to-xyz.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
@@ -136,8 +137,8 @@ const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlas
 		Object.keys(RESULTS).forEach(function(id) {
 			const data = RESULTS[id];
 			const buffer = Buffer.concat([
-				data.mapBuffer,
-				data.pathBuffer,
+				data.mapBuffer || Buffer.alloc(0x10000, colors.unexploredMapByte),
+				data.pathBuffer || Buffer.alloc(0x10000, colors.unexploredPathByte),
 				includeMarkers ? data.markerBuffer || noMarkersBuffer : noMarkersBuffer
 			]);
 			const fileName = `${outputPath}/${id}.map`;
