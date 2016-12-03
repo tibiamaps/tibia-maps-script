@@ -17,6 +17,9 @@ const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
 const transposeBuffer = require('./transpose-buffer.js');
 
+const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
+const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
+
 const GLOBALS = {};
 
 const RESULTS = {};
@@ -120,9 +123,9 @@ const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlas
 				const coordinates = idToXyz(id);
 				const data = RESULTS[id];
 				const entry = {
-					'colordata': transposeBuffer(data.mapBuffer).toString('base64'),
+					'colordata': (data.mapBuffer ? transposeBuffer(data.mapBuffer) : EMPTY_MAP_BUFFER).toString('base64'),
 					'mapmarkers': data.flashMarkers || [],
-					'waypoints': transposeBuffer(data.pathBuffer).toString('base64'),
+					'waypoints': (data.pathBuffer ? transposeBuffer(data.pathBuffer) : EMPTY_PATH_BUFFER).toString('base64'),
 					'x': coordinates.x * 256,
 					'y': coordinates.y * 256,
 					'z': coordinates.z
@@ -137,8 +140,8 @@ const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlas
 		Object.keys(RESULTS).forEach(function(id) {
 			const data = RESULTS[id];
 			const buffer = Buffer.concat([
-				data.mapBuffer || Buffer.alloc(0x10000, colors.unexploredMapByte),
-				data.pathBuffer || Buffer.alloc(0x10000, colors.unexploredPathByte),
+				data.mapBuffer || EMPTY_MAP_BUFFER,
+				data.pathBuffer || EMPTY_PATH_BUFFER,
 				includeMarkers ? data.markerBuffer || noMarkersBuffer : noMarkersBuffer
 			]);
 			const fileName = `${outputPath}/${id}.map`;
