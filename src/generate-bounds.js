@@ -4,7 +4,7 @@ const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
 
-const padLeft = require('lodash.padleft');
+const padStart = require('lodash.padstart');
 
 const writeJSON = require('./write-json.js');
 
@@ -46,7 +46,7 @@ const generateBounds = function(mapsDirectory, dataDirectory) {
 				if (bounds.zMax < z) {
 					bounds.zMax = z;
 				}
-				const floorID = padLeft(z, 2, '0');
+				const floorID = padStart(z, 2, '0');
 				if (floorIDs.indexOf(floorID) == -1) {
 					floorIDs.push(floorID);
 				}

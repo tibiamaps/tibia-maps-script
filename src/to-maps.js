@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
-const padLeft = require('lodash.padleft');
+const padStart = require('lodash.padstart');
 
 const handleSequence = require('./handle-sequence.js');
 const writeJSON = require('./write-json.js');
@@ -41,11 +41,11 @@ const forEachTile = function(map, callback, name, floorID) {
 	let yOffset = 0;
 	while (yOffset < bounds.height) {
 		const y = bounds.yMin + (yOffset / 256);
-		const yID = padLeft(y, 3, '0');
+		const yID = padStart(y, 3, '0');
 		let xOffset = 0;
 		while (xOffset < bounds.width) {
 			const x = bounds.xMin + (xOffset / 256);
-			const xID = padLeft(x, 3, '0');
+			const xID = padStart(x, 3, '0');
 			const pixels = GLOBALS.context.getImageData(xOffset, yOffset, 256, 256);
 			const buffer = callback(pixels.data, isGroundFloor);
 			const id = `${xID}${yID}${floorID}`;
