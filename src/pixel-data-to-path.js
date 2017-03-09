@@ -1,6 +1,7 @@
 'use strict';
 
 const colors = require('./colors.js');
+const nonWalkablePath = colors.nonWalkablePath;
 const unexploredPath = colors.unexploredPath;
 const unexploredPathByte = colors.unexploredPathByte;
 
@@ -29,12 +30,19 @@ const pixelDataToPathBuffer = function(data, isGroundFloor) {
 			) {
 				byteValue = unexploredPathByte;
 			} else {
-				// Verify that `r, `g`, and `b` are equal.
-				console.assert(r == g);
-				console.assert(r == b);
+				// Verify that `r, `g`, and `b` are either equal or the non-walkable
+				// color.
+				console.assert(
+					(r == g && r == b) ||
+					(
+						r == nonWalkablePath.r &&
+						g == nonWalkablePath.g &&
+						b == nonWalkablePath.b
+					)
+				);
 				hasData = true;
 				// Get the byte value that corresponds to this color.
-				byteValue = 0xFF - r;
+				byteValue = r;
 			}
 			buffer.writeUInt8(byteValue, ++bufferIndex);
 		}

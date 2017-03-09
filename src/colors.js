@@ -28,14 +28,20 @@ Object.keys(byByte).forEach(function(key) {
 
 const unexploredMapByte = 0x00;
 const unexploredPathByte = 0xFA;
+const nonWalkablePathByte = 0xFF;
 
 module.exports = {
 	'unexploredMapByte': unexploredMapByte,
 	'unexploredMap': byByte[unexploredMapByte],
+	'nonWalkablePathByte': nonWalkablePathByte,
+	// The Tibia 11 client marks unwalkable paths as yellow.
+	'nonWalkablePath': byByte[0xD2],
+	'unexploredPath': {
+		r: unexploredPathByte,
+		g: unexploredPathByte,
+		b: unexploredPathByte
+	},
 	'unexploredPathByte': unexploredPathByte,
-	// For the unexplored path color, we get to pick any color, not necessarily
-	// `byByte[unexploredPathByte]`. Watery blue looks nice.
-	'unexploredPath': byByte[0x33],
 	'byByte': byByte,
 	'byColor': byColor
 };

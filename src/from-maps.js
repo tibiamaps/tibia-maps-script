@@ -40,9 +40,9 @@ Object.keys(colors.byByte).forEach(function(pixelByte) {
 
 const pathPixelPalette = {};
 for (const pixelByte of range(0, 255 + 1)) {
-	const isUnexplored = pixelByte == colors.unexploredPathByte;
-	const component = 0xFF - pixelByte;
-	const color = isUnexplored ? colors.unexploredPath : {
+	const isNonWalkable = pixelByte == colors.nonWalkablePathByte;
+	const component = pixelByte;
+	const color = isNonWalkable ? colors.nonWalkablePath : {
 		'r': component,
 		'g': component,
 		'b': component
