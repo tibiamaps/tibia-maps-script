@@ -4,13 +4,14 @@ const colors = require('./colors.js');
 const nonWalkablePath = colors.nonWalkablePath;
 const unexploredPath = colors.unexploredPath;
 const unexploredPathByte = colors.unexploredPathByte;
+const pixelDataToBuffer = require('./pixel-data-to-buffer.js');
 
-const pixelDataToPathBuffer = function(pixels, isGroundFloor) {
+// Check if the pathfinding data contains at least one explored map byte.
+const hasData = function(data, isGroundFloor) {
 	// https://tibiamaps.io/guides/map-file-format#pathfinding-data
-	const data = pixels.data;
-	let hasData = isGroundFloor;
-	const buffer = new Buffer(0x10000);
-	let bufferIndex = -1;
+	if (isGroundFloor) {
+		return true;
+	}
 	let xIndex = -1;
 	while (++xIndex < 256) {
 		const xOffset = xIndex * 4;
@@ -41,14 +42,18 @@ const pixelDataToPathBuffer = function(pixels, isGroundFloor) {
 						b == nonWalkablePath.b
 					)
 				);
-				hasData = true;
-				// Get the byte value that corresponds to this color.
-				byteValue = r;
+				return true;
 			}
-			buffer.writeUInt8(byteValue, ++bufferIndex);
 		}
 	}
-	return hasData && buffer;
+	return false;
 };
 
-module.exports = pixelDataToPathBuffer;
+const pixelDataToMinimapPathBuffer = function(pixels) {
+	if (hasData(pixels.data)) {
+		return pixelDataToBuffer(pixels);
+	}
+	return false;
+};
+
+module.exports = pixelDataToMinimapPathBuffer;

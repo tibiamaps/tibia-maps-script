@@ -9,12 +9,15 @@ const padStart = require('lodash.padstart');
 const handleSequence = require('./handle-sequence.js');
 const writeJSON = require('./write-json.js');
 
-const arrayToFlashMarkers = require('./array-to-flash-markers.js');
+const arrayToFlashMarkerBuffer = require('./array-to-flash-marker.js');
 const arrayToMarkerBuffer = require('./array-to-marker.js');
+const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');
 const idToXyz = require('./id-to-xyz.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
+const pixelDataToMinimapMapBuffer = require('./pixel-data-to-minimap-map.js');
+const pixelDataToMinimapPathBuffer = require('./pixel-data-to-minimap-path.js');
 const transposeBuffer = require('./transpose-buffer.js');
 
 const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
@@ -23,7 +26,7 @@ const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
 const GLOBALS = {};
 
 const RESULTS = {};
-const addResult = function(id, type, result) {
+const addResult = (id, type, result) => {
 	if (!RESULTS[id]) {
 		RESULTS[id] = {};
 	}
@@ -31,7 +34,18 @@ const addResult = function(id, type, result) {
 	reference[type] = result;
 };
 
-const forEachTile = function(map, callback, name, floorID) {
+const writeBuffer = (fileName, buffer) => {
+	if (buffer == null) {
+		console.warn('Undefined buffer; skipping creating `' + fileName + '`');
+		return;
+	}
+	const writeStream = fs.createWriteStream(fileName);
+	writeStream.write(buffer);
+	writeStream.end();
+	console.log(`${fileName} created successfully.`);
+};
+
+const forEachTile = (map, callback, name, floorID) => {
 	const isGroundFloor = floorID == '07';
 	const bounds = GLOBALS.bounds;
 	const image = new Image();
@@ -47,7 +61,7 @@ const forEachTile = function(map, callback, name, floorID) {
 			const x = bounds.xMin + (xOffset / 256);
 			const xID = padStart(x, 3, '0');
 			const pixels = GLOBALS.context.getImageData(xOffset, yOffset, 256, 256);
-			const buffer = callback(pixels.data, isGroundFloor);
+			const buffer = callback(pixels, isGroundFloor);
 			const id = `${xID}${yID}${floorID}`;
 			if (buffer) {
 				addResult(id, name, buffer);
@@ -58,9 +72,9 @@ const forEachTile = function(map, callback, name, floorID) {
 	}
 };
 
-const createBinaryMap = function(floorID) {
-	return new Promise(function(resolve, reject) {
-		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, function(error, map) {
+const createBinaryMap = (floorID) => {
+	return new Promise((resolve, reject) => {
+		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, (error, map) => {
 			if (error) {
 				throw new Error(error);
 			}
@@ -70,9 +84,9 @@ const createBinaryMap = function(floorID) {
 	});
 };
 
-const createBinaryPath = function(floorID) {
-	return new Promise(function(resolve, reject) {
-		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, function(error, map) {
+const createBinaryPath = (floorID) => {
+	return new Promise((resolve, reject) => {
+		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, (error, map) => {
 			if (error) {
 				throw new Error(error);
 			}
@@ -82,21 +96,54 @@ const createBinaryPath = function(floorID) {
 	});
 };
 
-const createBinaryMarkers = function(floorID) {
-	return new Promise(function(resolve, reject) {
+const createMinimapMap = (floorID) => {
+	return new Promise((resolve, reject) => {
+		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, (error, map) => {
+			if (error) {
+				throw new Error(error);
+			}
+			forEachTile(map, pixelDataToMinimapMapBuffer, 'minimapMap', floorID);
+			resolve();
+		});
+	});
+};
+
+const createMinimapPath = (floorID) => {
+	return new Promise((resolve, reject) => {
+		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, function(error, map) {
+			if (error) {
+				throw new Error(error);
+			}
+			forEachTile(map, pixelDataToMinimapPathBuffer, 'minimapPath', floorID);
+			resolve();
+		});
+	});
+};
+
+let MINIMAP_MARKERS = new Buffer(0);
+const createBinaryMarkers = (floorID) => {
+	return new Promise((resolve, reject) => {
 		const data = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
-		Object.keys(data).forEach(function(id) {
+		Object.keys(data).forEach((id) => {
 			const markers = data[id];
 			const markerBuffer = arrayToMarkerBuffer(markers);
 			addResult(id, 'markerBuffer', markerBuffer);
-			const flashMarkers = arrayToFlashMarkers(markers);
+			const flashMarkers = arrayToFlashMarkerBuffer(markers);
 			addResult(id, 'flashMarkers', flashMarkers);
+			const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
+			// TODO: To match the Tibia installer’s import functionality, the markers
+			// are supposed to be ordered by their `x` coordinate value, then by
+			// their `y` coordinate value, in ascending order.
+			MINIMAP_MARKERS = Buffer.concat([
+				MINIMAP_MARKERS,
+				minimapMarkers
+			]);
 		});
 		resolve();
 	});
 };
 
-const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlash) {
+const convertToMaps = (dataDirectory, outputPath, includeMarkers, isFlash) => {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
@@ -109,17 +156,21 @@ const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlas
 	GLOBALS.canvas = new Canvas(bounds.width, bounds.height);
 	GLOBALS.context = GLOBALS.canvas.getContext('2d');
 	const floorIDs = bounds.floorIDs;
-	handleSequence(floorIDs, createBinaryMap).then(function() {
+	handleSequence(floorIDs, createBinaryMap).then(() => {
 		return handleSequence(floorIDs, createBinaryPath);
-	}).then(function() {
+	}).then(() => {
+		return handleSequence(floorIDs, createMinimapMap);
+	}).then(() => {
+		return handleSequence(floorIDs, createMinimapPath);
+	}).then(() => {
 		if (includeMarkers) {
 			return handleSequence(floorIDs, createBinaryMarkers);
 		}
-	}).then(function() {
+	}).then(() => {
 		const noMarkersBuffer = new Buffer([0x00, 0x00, 0x00, 0x00]);
 		if (isFlash) {
 			// https://tibiamaps.io/guides/exp-file-format
-			const lines = Object.keys(RESULTS).map(function(id) {
+			const lines = Object.keys(RESULTS).map((id) => {
 				const coordinates = idToXyz(id);
 				const data = RESULTS[id];
 				const entry = {
@@ -137,20 +188,27 @@ const convertToMaps = function(dataDirectory, outputPath, includeMarkers, isFlas
 			console.log(`${outputPath} created successfully.`);
 			return;
 		}
-		Object.keys(RESULTS).forEach(function(id) {
+		Object.keys(RESULTS).forEach((id) => {
 			const data = RESULTS[id];
+			// Generate the Tibia 10-compatible `*.map` files.
 			const buffer = Buffer.concat([
 				data.mapBuffer || EMPTY_MAP_BUFFER,
 				data.pathBuffer || EMPTY_PATH_BUFFER,
 				includeMarkers ? data.markerBuffer || noMarkersBuffer : noMarkersBuffer
 			]);
-			const fileName = `${outputPath}/${id}.map`;
-			const writeStream = fs.createWriteStream(fileName);
-			writeStream.write(buffer);
-			writeStream.end();
-			console.log(`${fileName} created successfully.`);
+			writeBuffer(`${outputPath}/${id}.map`, buffer);
+			// Generate the Tibia 11-compatible minimap PNGs.
+			const coords = idToXyz(id);
+			const minimapId = `${ coords.x * 256 }_${ coords.y * 256 }_${ coords.z }`;
+			writeBuffer(`minimap/Minimap_Color_${minimapId}.png`, data.minimapMap);
+			writeBuffer(`minimap/Minimap_WaypointCost_${minimapId}.png`, data.minimapPath);
 		});
-	}).catch(function(exception) {
+		if (includeMarkers && MINIMAP_MARKERS.length) {
+			// TODO: confirm that the file doesn’t exist when no markers are set.
+			// If not, figure out what the “empty” version of the file looks like.
+			writeBuffer(`minimap/minimapmarkers.bin`, MINIMAP_MARKERS);
+		}
+	}).catch((exception) => {
 		console.error(exception.stack);
 		reject(exception);
 	});

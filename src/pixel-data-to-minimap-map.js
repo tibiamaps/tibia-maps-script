@@ -2,13 +2,11 @@
 
 const colors = require('./colors.js');
 const unexploredMapByte = colors.unexploredMapByte;
+const pixelDataToBuffer = require('./pixel-data-to-buffer.js');
 
-const pixelDataToMapBuffer = function(pixels) {
-	const data = pixels.data;
+// Check if the pixel data contains at least one explored map byte.
+const hasData = function(data) {
 	// https://tibiamaps.io/guides/map-file-format#visual-map-data
-	let hasData = false;
-	const buffer = new Buffer(0x10000);
-	let bufferIndex = -1;
 	let xIndex = -1;
 	while (++xIndex < 256) {
 		const xOffset = xIndex * 4;
@@ -25,13 +23,19 @@ const pixelDataToMapBuffer = function(pixels) {
 			const id = `${r},${g},${b}`;
 			const byteValue = colors.byColor[id];
 			console.assert(byteValue != null, `Unknown color ID: ${id}`);
-			buffer.writeUInt8(byteValue, ++bufferIndex);
 			if (byteValue != unexploredMapByte) {
-				hasData = true;
+				return true;
 			}
 		}
 	}
-	return hasData && buffer;
+	return false;
 };
 
-module.exports = pixelDataToMapBuffer;
+const pixelDataToMinimapMapBuffer = function(pixels) {
+	if (hasData(pixels.data)) {
+		return pixelDataToBuffer(pixels);
+	}
+	return false;
+};
+
+module.exports = pixelDataToMinimapMapBuffer;

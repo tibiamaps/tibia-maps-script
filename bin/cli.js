@@ -13,17 +13,17 @@ const convertToMaps = require('../src/to-maps.js');
 const generateBounds = require('../src/generate-bounds.js');
 const info = require('../package.json');
 
-const emptyDirectory = function(path) {
-	return new Promise(function(resolve, reject) {
-		rimraf(`${path}/*`, function() {
-			mkdirp(path, function() {
+const emptyDirectory = (path) => {
+	return new Promise((resolve, reject) => {
+		rimraf(`${path}/*`, () => {
+			mkdirp(path, () => {
 				resolve();
 			});
 		});
 	});
 };
 
-const main = function() {
+const main = () => {
 	const excludeMarkers = argv['markers'] === false;
 
 	if (process.argv.length == 2) {
@@ -88,9 +88,12 @@ const main = function() {
 			argv['output-dir'] = 'Automap-new';
 		}
 		const mapsDirectory = path.resolve(String(argv['output-dir']));
-		emptyDirectory(mapsDirectory).then(function() {
-			convertToMaps(dataDirectory, mapsDirectory, !excludeMarkers, false);
-		});
+		const minimapDirectory = path.resolve(mapsDirectory, '../minimap');
+		emptyDirectory(mapsDirectory)
+			.then(() => emptyDirectory(minimapDirectory))
+			.then(() => {
+				convertToMaps(dataDirectory, mapsDirectory, !excludeMarkers, false);
+			});
 		return;
 	}
 };

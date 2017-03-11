@@ -4,7 +4,7 @@ const windows1252 = require('windows-1252');
 
 const icons = require('./icons.js');
 
-const arrayToFlashMarkers = function(array) {
+const arrayToFlashMarkers = (array) => {
 	const result = [];
 	for (const marker of array) {
 		// Note: the property order is important here. This order matches the
