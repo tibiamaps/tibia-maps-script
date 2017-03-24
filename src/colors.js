@@ -36,11 +36,7 @@ module.exports = {
 	'nonWalkablePathByte': nonWalkablePathByte,
 	// The Tibia 11 client marks unwalkable paths as yellow.
 	'nonWalkablePath': byByte[0xD2],
-	'unexploredPath': {
-		r: unexploredPathByte,
-		g: unexploredPathByte,
-		b: unexploredPathByte
-	},
+	'unexploredPath': { r: 255, g: 0, b: 255 },
 	'unexploredPathByte': unexploredPathByte,
 	'byByte': byByte,
 	'byColor': byColor
