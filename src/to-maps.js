@@ -36,7 +36,7 @@ const addResult = (id, type, result) => {
 
 const writeBuffer = (fileName, buffer) => {
 	if (buffer == null) {
-		console.warn('Undefined buffer; skipping creating `' + fileName + '`');
+		console.log('Undefined buffer; skipping creating `' + fileName + '`');
 		return;
 	}
 	const writeStream = fs.createWriteStream(fileName);
