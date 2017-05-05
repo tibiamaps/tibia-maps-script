@@ -5,6 +5,7 @@ const fs = require('fs');
 const Canvas = require('canvas');
 const Image = Canvas.Image;
 const padStart = require('lodash.padstart');
+const { wrapColorData, wrapWaypointData } = require('tibia-minimap-png');
 
 const handleSequence = require('./handle-sequence.js');
 const writeJSON = require('./write-json.js');
@@ -16,8 +17,6 @@ const colors = require('./colors.js');
 const idToXyz = require('./id-to-xyz.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
-const pixelDataToMinimapMapBuffer = require('./pixel-data-to-minimap-map.js');
-const pixelDataToMinimapPathBuffer = require('./pixel-data-to-minimap-path.js');
 const transposeBuffer = require('./transpose-buffer.js');
 
 const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
@@ -96,30 +95,6 @@ const createBinaryPath = (floorID) => {
 	});
 };
 
-const createMinimapMap = (floorID) => {
-	return new Promise((resolve, reject) => {
-		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, (error, map) => {
-			if (error) {
-				throw new Error(error);
-			}
-			forEachTile(map, pixelDataToMinimapMapBuffer, 'minimapMap', floorID);
-			resolve();
-		});
-	});
-};
-
-const createMinimapPath = (floorID) => {
-	return new Promise((resolve, reject) => {
-		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, function(error, map) {
-			if (error) {
-				throw new Error(error);
-			}
-			forEachTile(map, pixelDataToMinimapPathBuffer, 'minimapPath', floorID);
-			resolve();
-		});
-	});
-};
-
 let MINIMAP_MARKERS = new Buffer(0);
 const createBinaryMarkers = (floorID) => {
 	return new Promise((resolve, reject) => {
@@ -159,10 +134,6 @@ const convertToMaps = (dataDirectory, outputPath, includeMarkers, isFlash) => {
 	handleSequence(floorIDs, createBinaryMap).then(() => {
 		return handleSequence(floorIDs, createBinaryPath);
 	}).then(() => {
-		return handleSequence(floorIDs, createMinimapMap);
-	}).then(() => {
-		return handleSequence(floorIDs, createMinimapPath);
-	}).then(() => {
 		if (includeMarkers) {
 			return handleSequence(floorIDs, createBinaryMarkers);
 		}
@@ -190,18 +161,30 @@ const convertToMaps = (dataDirectory, outputPath, includeMarkers, isFlash) => {
 		}
 		Object.keys(RESULTS).forEach((id) => {
 			const data = RESULTS[id];
+			if (!data.mapBuffer) {
+				data.mapBuffer = EMPTY_MAP_BUFFER;
+			}
+			if (!data.pathBuffer) {
+				data.pathBuffer = EMPTY_PATH_BUFFER;
+			}
 			// Generate the Tibia 10-compatible `*.map` files.
 			const buffer = Buffer.concat([
-				data.mapBuffer || EMPTY_MAP_BUFFER,
-				data.pathBuffer || EMPTY_PATH_BUFFER,
+				data.mapBuffer,
+				data.pathBuffer,
 				includeMarkers ? data.markerBuffer || noMarkersBuffer : noMarkersBuffer
 			]);
 			writeBuffer(`${outputPath}/${id}.map`, buffer);
 			// Generate the Tibia 11-compatible minimap PNGs.
 			const coords = idToXyz(id);
 			const minimapId = `${ coords.x * 256 }_${ coords.y * 256 }_${ coords.z }`;
-			writeBuffer(`minimap/Minimap_Color_${minimapId}.png`, data.minimapMap);
-			writeBuffer(`minimap/Minimap_WaypointCost_${minimapId}.png`, data.minimapPath);
+			writeBuffer(
+				`minimap/Minimap_Color_${minimapId}.png`,
+				wrapColorData(data.mapBuffer)
+			);
+			writeBuffer(
+				`minimap/Minimap_WaypointCost_${minimapId}.png`,
+				wrapWaypointData(data.pathBuffer)
+			);
 		});
 		if (includeMarkers && MINIMAP_MARKERS.length) {
 			// TODO: confirm that the file doesn’t exist when no markers are set.
