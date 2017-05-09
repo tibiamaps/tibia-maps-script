@@ -4,7 +4,7 @@ const windows1252 = require('windows-1252');
 
 const icons = require('./icons.js');
 
-const arrayToMarkerBuffer = function(array) {
+const arrayToMarkerBuffer = (array) => {
 	let result = new Buffer(4);
 	result.writeUIntLE(array.length, 0, 4);
 	for (const marker of array) {
@@ -30,7 +30,7 @@ const arrayToMarkerBuffer = function(array) {
 		// description.
 		console.assert(
 			marker.description.length <= 99,
-			'Marker description should be 99 symbols or fewer'
+			'Marker description should be 99 symbols or fewer for the Tibia 10 format'
 		);
 		markerBuffer.writeUIntLE(marker.description.length, 12, 2);
 		markerBuffer.write(

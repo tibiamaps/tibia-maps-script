@@ -1,6 +1,6 @@
 'use strict';
 
-const transposeBuffer = function(buffer) {
+const transposeBuffer = (buffer) => {
 	const size = 256;
 	const result = [];
 	for (let xOffset = 0; xOffset < size; xOffset++) {

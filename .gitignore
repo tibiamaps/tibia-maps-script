@@ -3,6 +3,7 @@ test/data
 test/data-without-markers
 test/maps-new
 test/maps-new-without-markers
+test/minimap
 test/flash/maps-with-markers.exp
 test/flash/maps-without-markers.exp
 

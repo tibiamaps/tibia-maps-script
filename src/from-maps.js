@@ -55,6 +55,14 @@ for (const pixelByte of range(0, 255 + 1)) {
 	data[3] = 0xFF;
 	pathPixelPalette[pixelByte] = imageData;
 }
+// Add the special color for unexplored paths.
+const imageData = pixelContext.createImageData(1, 1);
+const data = imageData.data;
+data[0] = colors.unexploredPath.r;
+data[1] = colors.unexploredPath.g;
+data[2] = colors.unexploredPath.b;
+data[3] = 0xFF;
+pathPixelPalette[colors.unexploredPathByte] = imageData;
 
 let markers = {};
 const resetMarkers = function() {
@@ -160,7 +168,7 @@ const parseMarkerData = function(buffer, floor) {
 	//     · 2 · 4 · · ·
 	//     1 · 3 · · · 7
 	//     · · · 5 · 6 ·
-	markers.sort(function(a, b) {
+	markers.sort((a, b) => {
 		return (a.x * 100000 + a.y) - (b.x * 100000 + b.y);
 	});
 

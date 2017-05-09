@@ -37,6 +37,7 @@ for file in maps/*.map; do
 done;
 tibia-maps --from-data=data --flash-export-file=flash/maps-with-markers.exp;
 compare flash/maps-with-markers{,-expected}.exp;
+compare minimap/minimapmarkers.bin minimapmarkers-expected.bin;
 
 # Check if `--no-markers` skips importing the marker data.
 tibia-maps --from-maps=maps --output-dir=data-without-markers --no-markers;
