@@ -168,7 +168,7 @@ const parseMarkerData = function(buffer, floor) {
 	//     · 2 · 4 · · ·
 	//     1 · 3 · · · 7
 	//     · · · 5 · 6 ·
-	markers.sort(function(a, b) {
+	markers.sort((a, b) => {
 		return (a.x * 100000 + a.y) - (b.x * 100000 + b.y);
 	});
 

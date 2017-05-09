@@ -187,8 +187,7 @@ const convertToMaps = (dataDirectory, outputPath, includeMarkers, isFlash) => {
 			);
 		});
 		if (includeMarkers && MINIMAP_MARKERS.length) {
-			// TODO: confirm that the file doesn’t exist when no markers are set.
-			// If not, figure out what the “empty” version of the file looks like.
+			// The Tibia 11 installer doesn’t create the file if no markers are set.
 			writeBuffer(`minimap/minimapmarkers.bin`, MINIMAP_MARKERS);
 		}
 	}).catch((exception) => {
