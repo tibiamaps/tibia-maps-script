@@ -1,4 +1,4 @@
-# `tibia-maps` CLI [![Build status](https://travis-ci.org/tibiamaps/tibia-maps-script.svg?branch=master)](https://travis-ci.org/tibiamaps/tibia-maps-script) [![Dependency status](https://gemnasium.com/tibiamaps/tibia-maps-script.svg)](https://gemnasium.com/tibiamaps/tibia-maps-script)
+# `tibia-maps` CLI [![Build status](https://travis-ci.org/tibiamaps/tibia-maps-script.svg?branch=master)](https://travis-ci.org/tibiamaps/tibia-maps-script)
 
 `tibia-maps` is a command-line utility to convert between binary [Tibia](https://secure.tibia.com/) maps and [human-readable forms of the map data](https://github.com/tibiamaps/tibia-map-data).
 
@@ -10,7 +10,7 @@
 npm install -g tibia-maps
 ```
 
-If you’re on OS X and you’re getting [an error about `xcb-shm`](https://github.com/Automattic/node-canvas/pull/541), try this instead:
+If you’re on macOS and you get [an error about `xcb-shm`](https://github.com/Automattic/node-canvas/pull/541), try this instead:
 
 ```sh
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/X11/lib/pkgconfig"; npm install -g tibia-maps
