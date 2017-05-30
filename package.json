@@ -1,49 +1,49 @@
 {
-  "name": "tibia-maps",
-  "version": "4.0.0",
-  "description": "A command-line utility to convert between binary Tibia maps and human-readable forms of the map data.",
-  "homepage": "https://mths.be/tibiamaps",
-  "main": "bin/cli.js",
-  "bin": "bin/cli.js",
-  "keywords": [
-    "data",
-    "mmorpg",
-    "tibia",
-    "tibia-maps"
-  ],
-  "license": "MIT",
-  "author": {
-    "name": "Mathias Bynens",
-    "url": "https://mathiasbynens.be/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tibiamaps/tibia-maps-script.git"
-  },
-  "bugs": "https://github.com/tibiamaps/tibia-maps-script/issues",
-  "files": [
-    "LICENSE-MIT.txt",
-    "bin/",
-    "src/"
-  ],
-  "directories": {
-    "bin": "bin",
-    "test": "test"
-  },
-  "scripts": {
-    "test": "test/test.sh"
-  },
-  "dependencies": {
-    "argh": "^0.1.4",
-    "canvas": "^1.6.5",
-    "glob": "^7.1.1",
-    "lodash.padstart": "^4.6.1",
-    "lodash.range": "^3.2.0",
-    "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.1",
-    "sort-object": "^3.0.2",
-    "tibia-minimap-png": "^1.0.1",
-    "utf8": "^2.1.2",
-    "windows-1252": "^1.0.0"
-  }
+	"name": "tibia-maps",
+	"version": "4.0.0",
+	"description": "A command-line utility to convert between binary Tibia maps and human-readable forms of the map data.",
+	"homepage": "https://mths.be/tibiamaps",
+	"main": "bin/cli.js",
+	"bin": "bin/cli.js",
+	"keywords": [
+		"data",
+		"mmorpg",
+		"tibia",
+		"tibia-maps"
+	],
+	"license": "MIT",
+	"author": {
+		"name": "Mathias Bynens",
+		"url": "https://mathiasbynens.be/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tibiamaps/tibia-maps-script.git"
+	},
+	"bugs": "https://github.com/tibiamaps/tibia-maps-script/issues",
+	"files": [
+		"LICENSE-MIT.txt",
+		"bin/",
+		"src/"
+	],
+	"directories": {
+		"bin": "bin",
+		"test": "test"
+	},
+	"scripts": {
+		"test": "test/test.sh"
+	},
+	"dependencies": {
+		"argh": "^0.1.4",
+		"canvas": "^1.6.5",
+		"glob": "^7.1.1",
+		"lodash.padstart": "^4.6.1",
+		"lodash.range": "^3.2.0",
+		"mkdirp": "^0.5.1",
+		"rimraf": "^2.6.1",
+		"sort-object": "^3.0.2",
+		"tibia-minimap-png": "^1.0.1",
+		"utf8": "^2.1.2",
+		"windows-1252": "^1.0.0"
+	}
 }
