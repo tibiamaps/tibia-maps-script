@@ -1,10 +1,8 @@
 'use strict';
 
-const handleSequence = function(array, callback) {
-	return array.reduce(function(promise, item) {
-		return promise.then(function() {
-			return callback(item);
-		});
+const handleSequence = (array, callback) => {
+	return array.reduce((promise, item) => {
+		return promise.then(() => callback(item));
 	}, Promise.resolve());
 };
 

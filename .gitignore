@@ -1,6 +1,7 @@
 data
 test/data
 test/data-without-markers
+test/data-from-minimap
 test/maps-new
 test/maps-new-without-markers
 test/minimap

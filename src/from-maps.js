@@ -5,7 +5,6 @@ const glob = require('glob');
 const path = require('path');
 
 const Canvas = require('canvas');
-const Image = Canvas.Image;
 const range = require('lodash.range');
 const sortObject = require('sort-object');
 const windows1252 = require('windows-1252');
@@ -13,7 +12,7 @@ const windows1252 = require('windows-1252');
 const idToXyz = require('./id-to-xyz.js');
 
 const GLOBALS = {};
-const resetContext = function(context, fillStyle) {
+const resetContext = (context, fillStyle) => {
 	context.fillStyle = fillStyle;
 	context.fillRect(0, 0, GLOBALS.bounds.width, GLOBALS.bounds.height);
 };
@@ -63,11 +62,6 @@ data[1] = colors.unexploredPath.g;
 data[2] = colors.unexploredPath.b;
 data[3] = 0xFF;
 pathPixelPalette[colors.unexploredPathByte] = imageData;
-
-let markers = {};
-const resetMarkers = function() {
-	markers = {};
-};
 
 const renderMap = function(buffer) {
 	const canvas = new Canvas(256, 256);
@@ -124,8 +118,8 @@ const parseMarkerData = function(buffer, floor) {
 		const xTile = buffer.readUInt8(index++, 1);
 		marker.x = xTile * 256 + xOffset;
 		// The next two bytes are blank.
-		console.assert(index++, 0x00);
-		console.assert(index++, 0x00);
+		console.assert(buffer[index++] === 0x00);
+		console.assert(buffer[index++] === 0x00);
 
 		// The next byte is the `y` offset within this 256×256px tile.
 		const yOffset = buffer.readUInt8(index++, 1);
@@ -133,17 +127,17 @@ const parseMarkerData = function(buffer, floor) {
 		const yTile = buffer.readUInt8(index++, 1);
 		marker.y = yTile * 256 + yOffset;
 		// The next two bytes are blank.
-		console.assert(index++, 0x00);
-		console.assert(index++, 0x00);
+		console.assert(buffer[index++] === 0x00);
+		console.assert(buffer[index++] === 0x00);
 
 		// Include the floor number in the JSON data so that it doesn’t have to be
 		// inferred from the file name.
 		marker.z = floor;
 
 		// The next 4 bytes are the image ID of the marker icon.
-		const id = buffer.readUIntLE(index, 4);
+		const imageID = buffer.readUIntLE(index, 4);
 		index += 4;
-		marker.icon = icons.byID[id];
+		marker.icon = icons.byID[imageID];
 
 		// The next 2 bytes indicate the size of the string that follows.
 		const descriptionLength = buffer.readUIntLE(index, 2);
@@ -174,7 +168,7 @@ const parseMarkerData = function(buffer, floor) {
 
 	// Remove duplicate markers.
 	const set = new Set();
-	const uniqueMarkers = markers.filter(function(marker) {
+	const uniqueMarkers = markers.filter((marker) => {
 		const serialized = JSON.stringify(marker).toLowerCase();
 		const isDuplicate = set.has(serialized);
 		set.add(serialized);
@@ -183,15 +177,15 @@ const parseMarkerData = function(buffer, floor) {
 	return uniqueMarkers;
 };
 
-const drawMapSection = function(fileName, includeMarkers) {
-	return new Promise(function(resolve, reject) {
+const drawMapSection = (fileName, includeMarkers) => {
+	return new Promise((resolve, reject) => {
 
 		const id = path.basename(fileName, '.map');
 		const coordinates = idToXyz(id);
 		const xOffset = (coordinates.x - GLOBALS.bounds.xMin) * 256;
 		const yOffset = (coordinates.y - GLOBALS.bounds.yMin) * 256;
 
-		fs.readFile(fileName, function(error, buffer) {
+		fs.readFile(fileName, (error, buffer) => {
 
 			if (error) {
 				reject(error);
@@ -239,9 +233,14 @@ const drawMapSection = function(fileName, includeMarkers) {
 	});
 };
 
-const renderFloor = function(floorID, mapDirectory, dataDirectory, includeMarkers) {
+let markers = {};
+const resetMarkers = function() {
+	markers = {};
+};
+
+const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 	console.log(`Rendering floor ${floorID}…`);
-	return new Promise(function(resolve, reject) {
+	return new Promise((resolve, reject) => {
 		const unexploredMap = colors.unexploredMap;
 		resetContext(
 			GLOBALS.mapContext,
@@ -253,9 +252,9 @@ const renderFloor = function(floorID, mapDirectory, dataDirectory, includeMarker
 			`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
 		);
 		resetMarkers();
-		glob(`${mapDirectory}/*${floorID}.map`, function(error, files) {
+		glob(`${mapDirectory}/*${floorID}.map`, (error, files) => {
 			// Handle all map files for this floor sequentially.
-			handleSequence(files, function(fileName) {
+			handleSequence(files, (fileName) => {
 				return drawMapSection(fileName, includeMarkers);
 			}).then(function() {
 				return saveCanvasToPNG(
@@ -282,7 +281,7 @@ const renderFloor = function(floorID, mapDirectory, dataDirectory, includeMarker
 	});
 };
 
-const convertFromMaps = function(bounds, mapDirectory, dataDirectory, includeMarkers) {
+const convertFromMaps = (bounds, mapDirectory, dataDirectory, includeMarkers) => {
 	GLOBALS.bounds = bounds;
 	GLOBALS.mapCanvas = new Canvas(bounds.width, bounds.height);
 	GLOBALS.mapContext = GLOBALS.mapCanvas.getContext('2d');
@@ -294,7 +293,7 @@ const convertFromMaps = function(bounds, mapDirectory, dataDirectory, includeMar
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
-	handleSequence(bounds.floorIDs, function(floorID) {
+	handleSequence(bounds.floorIDs, (floorID) => {
 		return renderFloor(floorID, mapDirectory, dataDirectory, includeMarkers);
 	});
 };

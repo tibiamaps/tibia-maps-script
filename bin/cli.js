@@ -9,8 +9,10 @@ const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 
 const convertFromMaps = require('../src/from-maps.js');
+const convertFromMinimap = require('../src/from-minimap.js');
 const convertToMaps = require('../src/to-maps.js');
-const generateBounds = require('../src/generate-bounds.js');
+const generateBoundsFromAutomap = require('../src/generate-bounds-from-automap.js');
+const generateBoundsFromMinimap = require('../src/generate-bounds-from-minimap.js');
 const info = require('../package.json');
 
 const emptyDirectory = (path) => {
@@ -40,13 +42,17 @@ const main = () => {
 		return process.exit(0);
 	}
 
-	if (!argv['from-maps'] && !argv['from-data']) {
-		console.log('Missing `--from-maps` or `--from-data` flag.');
+	if (!argv['from-maps'] && !argv['from-minimap'] && !argv['from-data']) {
+		console.log('Missing `--from-maps`, `--from-minimap`, or `--from-data` flag.');
 		return process.exit(1);
 	}
 
-	if (argv['from-maps'] && argv['from-data']) {
-		console.log('Cannot use `--from-maps` and `--from-data` at the same time. Pick one.');
+	if (
+		argv['from-maps'] && argv['from-data'] ||
+		argv['from-minimap'] && argv['from-data'] ||
+		argv['from-maps'] && argv['from-minimap']
+	) {
+		console.log('Cannot combine `--from-maps` with `--from-minimap` or `--from-data`. Pick one.');
 		return process.exit(1);
 	}
 
@@ -61,11 +67,30 @@ const main = () => {
 			argv['output-dir'] = 'data';
 		}
 		const dataDirectory = path.resolve(String(argv['output-dir']));
-		emptyDirectory(dataDirectory).then(function() {
-			return generateBounds(mapsDirectory, dataDirectory);
-		}).then(function(bounds) {
-			return convertFromMaps(bounds, mapsDirectory, dataDirectory, !excludeMarkers);
-		});
+		emptyDirectory(dataDirectory)
+			.then(() => generateBoundsFromAutomap(mapsDirectory, dataDirectory))
+			.then((bounds) => convertFromMaps(
+				bounds, mapsDirectory, dataDirectory, !excludeMarkers
+			));
+		return;
+	}
+
+	if (argv['from-minimap']) {
+		if (argv['from-minimap'] === true) {
+			console.log('`--from-minimap` path not specified. Using the default, i.e. `minimap`.');
+			argv['from-minimap'] = 'minimap';
+		}
+		const mapsDirectory = path.resolve(String(argv['from-minimap']));
+		if (!argv['output-dir'] || argv['output-dir'] === true) {
+			console.log('`--output-dir` path not specified. Using the default, i.e. `data`.');
+			argv['output-dir'] = 'data';
+		}
+		const dataDirectory = path.resolve(String(argv['output-dir']));
+		emptyDirectory(dataDirectory)
+			.then(() => generateBoundsFromMinimap(mapsDirectory, dataDirectory))
+			.then((bounds) => convertFromMinimap(
+				bounds, mapsDirectory, dataDirectory, !excludeMarkers
+			));
 		return;
 	}
 
