@@ -39,6 +39,14 @@ tibia-maps --from-data=data --flash-export-file=flash/maps-with-markers.exp;
 compare flash/maps-with-markers{,-expected}.exp;
 compare minimap/minimapmarkers.bin minimapmarkers-expected.bin;
 
+# Check `--from-minimap` output.
+tibia-maps --from-minimap=minimap --output-dir=data-from-minimap;
+for file in data/*; do
+	f=$(basename "${file}");
+	[ -f "data-from-minimap/${f}" ] || echo "Missing file: ${f}";
+	compare "data/${f}" "data-from-minimap/${f}";
+done;
+
 # Check if `--no-markers` skips importing the marker data.
 tibia-maps --from-maps=maps --output-dir=data-without-markers --no-markers;
 files_with_markers="$(find data-without-markers -name '*-markers.json' \

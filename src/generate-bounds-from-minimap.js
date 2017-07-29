@@ -8,11 +8,11 @@ const padStart = require('lodash.padstart');
 
 const writeJSON = require('./write-json.js');
 
-const idToXyz = require('./id-to-xyz.js');
+const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
 
-const generateBounds = function(mapsDirectory, dataDirectory) {
-	return new Promise(function(resolve, reject) {
-		glob(`${mapsDirectory}/*.map`, function(error, files) {
+const generateBoundsFromMinimap = (mapsDirectory, dataDirectory) => {
+	return new Promise((resolve, reject) => {
+		glob(`${mapsDirectory}/*.png`, (error, files) => {
 			const bounds = {
 				'xMin': +Infinity,
 				'xMax': -Infinity,
@@ -24,9 +24,9 @@ const generateBounds = function(mapsDirectory, dataDirectory) {
 			const floorIDs = [];
 			for (const file of files) {
 				const id = path.basename(file);
-				const coordinates = idToXyz(id);
-				const x = coordinates.x;
-				const y = coordinates.y;
+				const coordinates = minimapIdToAbsoluteXyz(id);
+				const x = Math.floor(coordinates.x / 256);
+				const y = Math.floor(coordinates.y / 256);
 				const z = coordinates.z;
 				if (bounds.xMin > x) {
 					bounds.xMin = x;
@@ -60,4 +60,4 @@ const generateBounds = function(mapsDirectory, dataDirectory) {
 	});
 };
 
-module.exports = generateBounds;
+module.exports = generateBoundsFromMinimap;

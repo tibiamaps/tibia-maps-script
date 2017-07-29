@@ -4,7 +4,7 @@ const utf8 = require('utf8');
 
 const icons = require('./icons.js');
 
-const convertCoordinate = (x) => {
+const coordinateToMinimapBytes = (x) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
 	const x3 = x >> 14;
 	const x1 = 0x80 + x % 0x80;
@@ -34,12 +34,12 @@ const arrayToMinimapMarkerBuffer = (array) => {
 		markerBuffer.writeUInt8(0x0A, 2);
 		markerBuffer.writeUInt8(coordinateSize, 3);
 		markerBuffer.writeUInt8(0x08, 4);
-		const [ x1, x2, x3 ] = convertCoordinate(marker.x);
+		const [ x1, x2, x3 ] = coordinateToMinimapBytes(marker.x);
 		markerBuffer.writeUInt8(x1, 5);
 		markerBuffer.writeUInt8(x2, 6);
 		markerBuffer.writeUInt8(x3, 7);
 		markerBuffer.writeUInt8(0x10, 8);
-		const [ y1, y2, y3 ] = convertCoordinate(marker.y);
+		const [ y1, y2, y3 ] = coordinateToMinimapBytes(marker.y);
 		markerBuffer.writeUInt8(y1, 9);
 		markerBuffer.writeUInt8(y2, 10);
 		markerBuffer.writeUInt8(y3, 11);
