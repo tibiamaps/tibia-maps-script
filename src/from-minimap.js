@@ -232,9 +232,12 @@ const convertFromMaps = (bounds, mapDirectory, dataDirectory, includeMarkers) =>
 		return renderFloor(floorID, mapDirectory, dataDirectory, includeMarkers);
 	}).then(() => {
 		const fileName = `${mapDirectory}/minimapmarkers.bin`;
+		if (!fs.existsSync(fileName)) {
+			return;
+		}
 		fs.readFile(fileName, (error, buffer) => {
 			if (error) {
-				reject(error);
+				throw new Error(error);
 			}
 			const allMarkers = parseMarkerData(buffer);
 			const markersByFloor = {};
