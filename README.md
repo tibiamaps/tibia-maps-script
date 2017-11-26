@@ -18,35 +18,25 @@ export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/X11/lib/pkgconfig"; npm install 
 
 ## Usage
 
-### `*.map` → `*.png` + `*.json`
+### `minimap/*` → `data/*`
 
-To generate PNGs for the maps + pathfinding visualization and JSON for the marker data based on the map files in the `Automap` directory, run:
+To generate PNGs for the maps + pathfinding visualization and JSON for the marker data based on the map files in the `minimap` directory, run:
 
 ```sh
-tibia-maps --from-maps=./Automap --output-dir=./data
+tibia-maps --from-minimap=./minimap --output-dir=./data
 ```
 
 The output is saved in the `data` directory.
 
-### `*.png` + `*.json` → `*.map`
+### `data/*` → `minimap/*`
 
-To generate Tibia-compatible `*.map` files based on the PNGs and JSON files in the `data` directory, run:
-
-```sh
-tibia-maps --from-data=./data --output-dir=./Automap-new
-```
-
-The output is saved in the `Automap-new` directory.
-
-### `*.png` + `*.json` → `*.exp`
-
-To generate [Tibia Flash client–compatible `*.exp` files](https://tibiamaps.io/guides/exp-file-format) based on the PNGs and JSON files in the `data` directory, run:
+To generate Tibia-compatible `minimap/*` files based on the PNGs and JSON files in the `data` directory, run:
 
 ```sh
-tibia-maps --from-data=./data --flash-export-file=./maps.exp
+tibia-maps --from-data=./data --output-dir=./minimap-new
 ```
 
-The export file is saved as `maps.exp`.
+The output is saved in the `minimap-new` directory.
 
 ## Author
 
