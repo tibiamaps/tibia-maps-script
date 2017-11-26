@@ -1,4 +1,2 @@
 # Automatically normalize line endings for all text-based files.
 * text=auto
-# Ensure export files get CRLF line endings.
-*.exp text eol=crlf

@@ -28,42 +28,21 @@ function compare() {
 
 # Check if the generated map files based on the generated PNG and JSON data
 # match the original map files, and call out any differences.
-tibia-maps --from-maps=maps --output-dir=data;
-tibia-maps --from-data=data --output-dir=maps-new;
-for file in maps/*.map; do
+tibia-maps --from-minimap=minimap --output-dir=data;
+tibia-maps --from-data=data --output-dir=minimap-new;
+for file in minimap/*.png; do
 	f=$(basename "${file}");
-	[ -f "maps-new/${f}" ] || echo "Missing file: ${f}";
-	compare "maps/${f}" "maps-new/${f}";
+	[ -f "minimap-new/${f}" ] || echo "Missing file: ${f}";
+	compare "minimap/${f}" "minimap-new/${f}";
 done;
-tibia-maps --from-data=data --flash-export-file=flash/maps-with-markers.exp;
-compare flash/maps-with-markers{,-expected}.exp;
-compare minimap/minimapmarkers.bin minimapmarkers-expected.bin;
-
-# Check `--from-minimap` output.
-tibia-maps --from-minimap=minimap --output-dir=data-from-minimap;
-for file in data/*; do
-	f=$(basename "${file}");
-	[ -f "data-from-minimap/${f}" ] || echo "Missing file: ${f}";
-	compare "data/${f}" "data-from-minimap/${f}";
-done;
+compare minimap/minimapmarkers.bin minimap-new/minimapmarkers.bin;
 
 # Check if `--no-markers` skips importing the marker data.
-tibia-maps --from-maps=maps --output-dir=data-without-markers --no-markers;
+tibia-maps --from-minimap=minimap --output-dir=data-without-markers --no-markers;
 files_with_markers="$(find data-without-markers -name '*-markers.json' \
 	-type f -size +3c)";
 if [ "$(tr -d '\n' <<< ${files_with_markers})" != "" ]; then
 	echo 'Error: `--no-markers` extracted marker data anyway!';
-	echo "${files_with_markers}";
-	exit 1;
-fi;
-tibia-maps --from-data=data-without-markers --flash-export-file=flash/maps-without-markers.exp --no-markers;
-compare flash/maps-without-markers{,-expected}.exp;
-
-# Check if `--no-markers` produces map files without any markers in them.
-tibia-maps --from-data=data --output-dir=maps-new-without-markers --no-markers;
-files_with_markers="$(find maps-new-without-markers -type f -size +131076c)";
-if [ "$(tr -d '\n' <<< ${files_with_markers})" != "" ]; then
-	echo 'Error: `--no-markers` produced file(s) larger than 0x20004 bytes!';
 	echo "${files_with_markers}";
 	exit 1;
 fi;

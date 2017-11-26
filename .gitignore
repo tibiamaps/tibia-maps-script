@@ -1,15 +1,10 @@
 data
 test/data
 test/data-without-markers
-test/data-from-minimap
-test/maps-new
-test/maps-new-without-markers
-test/minimap
-test/flash/maps-with-markers.exp
-test/flash/maps-without-markers.exp
 
 # Installed npm modules
 node_modules
+package-lock.json
 
 # Folder view configuration files
 .DS_Store
