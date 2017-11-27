@@ -23,7 +23,7 @@ const emptyDirectory = (path) => {
 	});
 };
 
-const main = () => {
+const main = async () => {
 	const excludeMarkers = argv['markers'] === false;
 
 	if (process.argv.length == 2) {
@@ -40,7 +40,7 @@ const main = () => {
 	}
 
 	if (!argv['from-minimap'] && !argv['from-data']) {
-		console.log('Missing `--from-minimap`, or `--from-data` flag.');
+		console.log('Missing `--from-minimap` or `--from-data` flag.');
 		return process.exit(1);
 	}
 
@@ -60,11 +60,11 @@ const main = () => {
 			argv['output-dir'] = 'data';
 		}
 		const dataDirectory = path.resolve(String(argv['output-dir']));
-		emptyDirectory(dataDirectory)
-			.then(() => generateBoundsFromMinimap(mapsDirectory, dataDirectory))
-			.then((bounds) => convertFromMinimap(
-				bounds, mapsDirectory, dataDirectory, !excludeMarkers
-			));
+		await emptyDirectory(dataDirectory);
+		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory);
+		convertFromMinimap(
+			bounds, mapsDirectory, dataDirectory, !excludeMarkers
+		);
 		return;
 	}
 
@@ -79,11 +79,8 @@ const main = () => {
 			argv['output-dir'] = 'minimap-new';
 		}
 		const minimapDirectory = path.resolve(String(argv['output-dir']));
-		emptyDirectory(minimapDirectory)
-			.then(() => emptyDirectory(minimapDirectory))
-			.then(() => {
-				convertToMinimap(dataDirectory, minimapDirectory, !excludeMarkers);
-			});
+		await emptyDirectory(minimapDirectory);
+		await convertToMinimap(dataDirectory, minimapDirectory, !excludeMarkers);
 		return;
 	}
 };

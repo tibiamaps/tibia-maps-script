@@ -19,25 +19,22 @@ const byByte = {
 };
 
 const byColor = {};
-Object.keys(byByte).forEach(function(key) {
+for (const key of Object.keys(byByte)) {
 	const byteValue = Number(key);
 	const color = byByte[byteValue];
 	const id = `${color.r},${color.g},${color.b}`;
 	byColor[id] = byteValue;
-});
+}
 
 const unexploredMapByte = 0x00;
 const unexploredPathByte = 0xFA;
-const nonWalkablePathByte = 0xFF;
 
 module.exports = {
 	'unexploredMapByte': unexploredMapByte,
 	'unexploredMap': byByte[unexploredMapByte],
-	'nonWalkablePathByte': nonWalkablePathByte,
 	// The Tibia 11 client marks unwalkable paths as yellow.
 	'nonWalkablePath': byByte[0xD2],
 	'unexploredPath': { r: 0xFA, g: 0xFA, b: 0xFA },
 	'unexploredPathByte': unexploredPathByte,
-	'byByte': byByte,
-	'byColor': byColor
+	'byColor': byColor,
 };

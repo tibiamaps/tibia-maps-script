@@ -5,7 +5,7 @@ const nonWalkablePath = colors.nonWalkablePath;
 const unexploredPath = colors.unexploredPath;
 const unexploredPathByte = colors.unexploredPathByte;
 
-const pixelDataToPathBuffer = function(pixels, isGroundFloor) {
+const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 	// https://tibiamaps.io/guides/map-file-format#pathfinding-data
 	const data = pixels.data;
 	let hasData = isGroundFloor;

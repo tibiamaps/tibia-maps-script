@@ -96,7 +96,7 @@ let MINIMAP_MARKERS = new Buffer(0);
 const createBinaryMarkers = (floorID) => {
 	return new Promise((resolve, reject) => {
 		const data = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
-		Object.keys(data).forEach((id) => {
+		for (const id of Object.keys(data)) {
 			const markers = data[id];
 			const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
 			// TODO: To match the Tibia installer’s import functionality, the markers
@@ -106,12 +106,12 @@ const createBinaryMarkers = (floorID) => {
 				MINIMAP_MARKERS,
 				minimapMarkers
 			]);
-		});
+		}
 		resolve();
 	});
 };
 
-const convertToMinimap = (dataDirectory, outputPath, includeMarkers) => {
+const convertToMinimap = async (dataDirectory, outputPath, includeMarkers) => {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
@@ -124,14 +124,13 @@ const convertToMinimap = (dataDirectory, outputPath, includeMarkers) => {
 	GLOBALS.canvas = new Canvas(bounds.width, bounds.height);
 	GLOBALS.context = GLOBALS.canvas.getContext('2d');
 	const floorIDs = bounds.floorIDs;
-	handleSequence(floorIDs, createBinaryMap).then(() => {
-		return handleSequence(floorIDs, createBinaryPath);
-	}).then(() => {
+	try {
+		await handleSequence(floorIDs, createBinaryMap);
+		await handleSequence(floorIDs, createBinaryPath);
 		if (includeMarkers) {
-			return handleSequence(floorIDs, createBinaryMarkers);
+			await handleSequence(floorIDs, createBinaryMarkers);
 		}
-	}).then(() => {
-		Object.keys(RESULTS).forEach((id) => {
+		for (const id of Object.keys(RESULTS)) {
 			const data = RESULTS[id];
 			if (!data.mapBuffer) {
 				data.mapBuffer = EMPTY_MAP_BUFFER;
@@ -150,15 +149,15 @@ const convertToMinimap = (dataDirectory, outputPath, includeMarkers) => {
 				`${outputPath}/Minimap_WaypointCost_${minimapId}.png`,
 				wrapWaypointData(data.pathBuffer)
 			);
-		});
+		}
 		if (includeMarkers && MINIMAP_MARKERS.length) {
 			// The Tibia 11 installer doesn’t create the file if no markers are set.
 			writeBuffer(`${outputPath}/minimapmarkers.bin`, MINIMAP_MARKERS);
 		}
-	}).catch((exception) => {
+	} catch (exception) {
 		console.error(exception.stack);
 		reject(exception);
-	});
+	}
 };
 
 module.exports = convertToMinimap;

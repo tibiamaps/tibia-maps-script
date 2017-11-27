@@ -171,52 +171,55 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 	);
 	const floorNumber = Number(floorID);
 	const pMap = new Promise((resolve, reject) => {
-		glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`, (error, files) => {
+		glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`, async (error, files) => {
 			// Handle all map files for this floor sequentially.
-			handleSequence(files, (fileName) => {
-				return drawMapSection(fileName, includeMarkers);
-			}).then(() => {
-				return saveCanvasToPNG(
+			try {
+				await handleSequence(files, (fileName) => {
+					return drawMapSection(fileName, includeMarkers);
+				});
+				await saveCanvasToPNG(
 					`${dataDirectory}/floor-${floorID}-map.png`,
 					GLOBALS.mapCanvas
 				);
-			}).then(() => {
 				resolve();
-			}).catch((exception) => {
+			} catch (exception) {
 				console.error(exception.stack);
 				reject(exception);
-			});
+			}
 		});
 	});
 
 	const pPath = new Promise((resolve, reject) => {
-		glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`, (error, files) => {
+		glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`, async (error, files) => {
 			// Handle all path files for this floor sequentially.
-			handleSequence(files, (fileName) => {
-				return drawPathSection(fileName, includeMarkers);
-			}).then(() => {
-				return saveCanvasToPNG(
+			try {
+				await handleSequence(files, (fileName) => {
+					return drawPathSection(fileName, includeMarkers);
+				});
+				await saveCanvasToPNG(
 					`${dataDirectory}/floor-${floorID}-path.png`,
 					GLOBALS.pathCanvas
 				);
-			}).then(() => {
 				resolve();
-			}).catch((exception) => {
+			} catch (exception) {
 				console.error(exception.stack);
 				reject(exception);
-			});
+			}
 		});
 	});
 
-	return new Promise((resolve, reject) => {
-		return pMap
-			.then(() => pPath)
-			.then(() => resolve())
-			.catch(() => reject());
+	return new Promise(async (resolve, reject) => {
+		try {
+			await pMap;
+			await pPath;
+			resolve();
+		} catch (exception) {
+			reject();
+		}
 	});
 };
 
-const convertFromMaps = (bounds, mapDirectory, dataDirectory, includeMarkers) => {
+const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarkers) => {
 	GLOBALS.bounds = bounds;
 	GLOBALS.mapCanvas = new Canvas(bounds.width, bounds.height);
 	GLOBALS.mapContext = GLOBALS.mapCanvas.getContext('2d');
@@ -228,40 +231,39 @@ const convertFromMaps = (bounds, mapDirectory, dataDirectory, includeMarkers) =>
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
-	handleSequence(bounds.floorIDs, (floorID) => {
+	await handleSequence(bounds.floorIDs, (floorID) => {
 		return renderFloor(floorID, mapDirectory, dataDirectory, includeMarkers);
-	}).then(() => {
-		const fileName = `${mapDirectory}/minimapmarkers.bin`;
-		if (!fs.existsSync(fileName)) {
-			return;
+	});
+	const fileName = `${mapDirectory}/minimapmarkers.bin`;
+	if (!fs.existsSync(fileName)) {
+		return;
+	}
+	fs.readFile(fileName, (error, buffer) => {
+		if (error) {
+			throw new Error(error);
 		}
-		fs.readFile(fileName, (error, buffer) => {
-			if (error) {
-				throw new Error(error);
+		const allMarkers = parseMarkerData(buffer);
+		const markersByFloor = {};
+		for (const marker of allMarkers) {
+			const xID = padStart(Math.floor(marker.x / 256), 3, '0');
+			const yID = padStart(Math.floor(marker.y / 256), 3, '0');
+			const floorID = padStart(marker.z, 2, '0');
+			const mapID = `${xID}${yID}${floorID}`;
+			if (!markersByFloor[floorID]) {
+				markersByFloor[floorID] = {};
 			}
-			const allMarkers = parseMarkerData(buffer);
-			const markersByFloor = {};
-			for (const marker of allMarkers) {
-				const xID = padStart(Math.floor(marker.x / 256), 3, '0');
-				const yID = padStart(Math.floor(marker.y / 256), 3, '0');
-				const floorID = padStart(marker.z, 2, '0');
-				const mapID = `${xID}${yID}${floorID}`;
-				if (!markersByFloor[floorID]) {
-					markersByFloor[floorID] = {};
-				}
-				if (!markersByFloor[floorID][mapID]) {
-					markersByFloor[floorID][mapID] = [];
-				}
-				markersByFloor[floorID][mapID].push(marker);
+			if (!markersByFloor[floorID][mapID]) {
+				markersByFloor[floorID][mapID] = [];
 			}
-			for (const floorID of bounds.floorIDs) {
-				const markers = markersByFloor[floorID];
-				writeJSON(
-					`${dataDirectory}/floor-${floorID}-markers.json`,
-					includeMarkers && markers ? markers : {}
-				);
-			}
-		});
+			markersByFloor[floorID][mapID].push(marker);
+		}
+		for (const floorID of bounds.floorIDs) {
+			const markers = markersByFloor[floorID];
+			writeJSON(
+				`${dataDirectory}/floor-${floorID}-markers.json`,
+				includeMarkers && markers ? markers : {}
+			);
+		}
 	});
 };
 

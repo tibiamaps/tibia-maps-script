@@ -22,10 +22,10 @@ const byID = {
 };
 
 const byName = {};
-Object.keys(byID).forEach(function(id) {
+for (const id of Object.keys(byID)) {
 	const name = byID[id];
 	byName[name] = Number(id);
-});
+}
 
 module.exports = {
 	byID: byID,

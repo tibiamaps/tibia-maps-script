@@ -1,9 +1,9 @@
 'use strict';
 
-const handleSequence = (array, callback) => {
-	return array.reduce((promise, item) => {
-		return promise.then(() => callback(item));
-	}, Promise.resolve());
+const handleSequence = async (array, callback) => {
+	for (const item of array) {
+		await callback(item);
+	}
 };
 
 module.exports = handleSequence;
