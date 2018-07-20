@@ -25,12 +25,14 @@ const emptyDirectory = (path) => {
 
 const main = async () => {
 	const excludeMarkers = argv['markers'] === false;
+	const overlayGrid = argv['overlay-grid'] === true;
 
 	if (process.argv.length == 2) {
 		console.log(`${info.name} v${info.version} - ${info.homepage}`);
 		console.log('\nUsage:\n');
 		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`);
+		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`);
 		process.exit(1);
 	}
 
@@ -80,7 +82,7 @@ const main = async () => {
 		}
 		const minimapDirectory = path.resolve(String(argv['output-dir']));
 		await emptyDirectory(minimapDirectory);
-		await convertToMinimap(dataDirectory, minimapDirectory, !excludeMarkers);
+		await convertToMinimap(dataDirectory, minimapDirectory, !excludeMarkers, overlayGrid);
 		return;
 	}
 };

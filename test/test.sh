@@ -46,3 +46,12 @@ if [ "$(tr -d '\n' <<< ${files_with_markers})" != "" ]; then
 	echo "${files_with_markers}";
 	exit 1;
 fi;
+
+# Check if `--overlay-grid` works correctly.
+tibia-maps --from-data=data --output-dir=minimap-grid-new --overlay-grid;
+for file in minimap-grid/*.png; do
+	f=$(basename "${file}");
+	[ -f "minimap-grid-new/${f}" ] || echo "Missing file: ${f}";
+	compare "minimap-grid/${f}" "minimap-grid-new/${f}";
+done;
+compare minimap-grid/minimapmarkers.bin minimap-grid-new/minimapmarkers.bin;

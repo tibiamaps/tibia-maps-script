@@ -39,7 +39,8 @@ const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 						r == nonWalkablePath.r &&
 						g == nonWalkablePath.g &&
 						b == nonWalkablePath.b
-					)
+					),
+					`${r},${g},${b}`
 				);
 				hasData = true;
 				// Get the byte value that corresponds to this color.

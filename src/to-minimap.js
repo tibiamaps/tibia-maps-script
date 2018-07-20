@@ -111,7 +111,7 @@ const createBinaryMarkers = (floorID) => {
 	});
 };
 
-const convertToMinimap = async (dataDirectory, outputPath, includeMarkers) => {
+const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overlayGrid) => {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
@@ -143,7 +143,7 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers) => {
 			const minimapId = `${ coords.x * 256 }_${ coords.y * 256 }_${ coords.z }`;
 			writeBuffer(
 				`${outputPath}/Minimap_Color_${minimapId}.png`,
-				wrapColorData(data.mapBuffer)
+				wrapColorData(data.mapBuffer, { overlayGrid })
 			);
 			writeBuffer(
 				`${outputPath}/Minimap_WaypointCost_${minimapId}.png`,

@@ -42,7 +42,7 @@
 		"mkdirp": "^0.5.1",
 		"rimraf": "^2.6.1",
 		"sort-object": "^3.0.2",
-		"tibia-minimap-png": "^1.0.1",
+		"tibia-minimap-png": "^1.1.0",
 		"utf8": "^2.1.2",
 		"windows-1252": "^1.0.0"
 	}
