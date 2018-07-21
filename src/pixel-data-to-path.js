@@ -3,6 +3,7 @@
 const colors = require('./colors.js');
 const nonWalkablePath = colors.nonWalkablePath;
 const unexploredPath = colors.unexploredPath;
+const unexploredPathAlternate = colors.unexploredPathAlternate;
 const unexploredPathByte = colors.unexploredPathByte;
 
 const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
@@ -25,9 +26,15 @@ const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 			//const a = data[offset + 3];
 			let byteValue;
 			if (
-				r == unexploredPath.r &&
-				b == unexploredPath.b &&
-				g == unexploredPath.g
+				(
+					r == unexploredPath.r &&
+					b == unexploredPath.b &&
+					g == unexploredPath.g
+				) || (
+					r == unexploredPathAlternate.r &&
+					b == unexploredPathAlternate.b &&
+					g == unexploredPathAlternate.g
+				)
 			) {
 				byteValue = unexploredPathByte;
 			} else {
