@@ -100,8 +100,6 @@ const parseMarkerData = (buffer) => {
 	}
 
 	// Sort markers so they start in the top left, then go from top to bottom.
-	// This matches the order of the keys in the root object, where e.g.
-	// `12412407` appears before `12412507` which appears before `12512407`.
 	// Example:
 	//     · 2 · 4 · · ·
 	//     1 · 3 · · · 7
@@ -243,25 +241,20 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 			throw new Error(error);
 		}
 		const allMarkers = parseMarkerData(buffer);
-		const markersByFloor = {};
+		const markersByFloor = new Map();
 		for (const marker of allMarkers) {
-			const xID = padStart(Math.floor(marker.x / 256), 3, '0');
-			const yID = padStart(Math.floor(marker.y / 256), 3, '0');
 			const floorID = padStart(marker.z, 2, '0');
-			const mapID = `${xID}${yID}${floorID}`;
-			if (!markersByFloor[floorID]) {
-				markersByFloor[floorID] = {};
+			if (markersByFloor.has(floorID)) {
+				markersByFloor.get(floorID).push(marker);
+			} else {
+				markersByFloor.set(floorID, [marker]);
 			}
-			if (!markersByFloor[floorID][mapID]) {
-				markersByFloor[floorID][mapID] = [];
-			}
-			markersByFloor[floorID][mapID].push(marker);
 		}
 		for (const floorID of bounds.floorIDs) {
-			const markers = markersByFloor[floorID];
+			const markers = markersByFloor.get(floorID);
 			writeJSON(
 				`${dataDirectory}/floor-${floorID}-markers.json`,
-				includeMarkers && markers ? markers : {}
+				includeMarkers && markers ? markers : []
 			);
 		}
 	});

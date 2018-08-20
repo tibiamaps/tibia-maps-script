@@ -95,18 +95,15 @@ const createBinaryPath = (floorID) => {
 let MINIMAP_MARKERS = new Buffer(0);
 const createBinaryMarkers = (floorID) => {
 	return new Promise((resolve, reject) => {
-		const data = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
-		for (const id of Object.keys(data)) {
-			const markers = data[id];
-			const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
-			// TODO: To match the Tibia installer’s import functionality, the markers
-			// are supposed to be ordered by their `x` coordinate value, then by
-			// their `y` coordinate value, in ascending order.
-			MINIMAP_MARKERS = Buffer.concat([
-				MINIMAP_MARKERS,
-				minimapMarkers
-			]);
-		}
+		const markers = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
+		const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
+		// TODO: To match the Tibia installer’s import functionality, the markers
+		// are supposed to be ordered by their `x` coordinate value, then by
+		// their `y` coordinate value, in ascending order.
+		MINIMAP_MARKERS = Buffer.concat([
+			MINIMAP_MARKERS,
+			minimapMarkers
+		]);
 		resolve();
 	});
 };
