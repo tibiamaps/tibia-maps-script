@@ -92,7 +92,7 @@ const createBinaryPath = (floorID) => {
 	});
 };
 
-let MINIMAP_MARKERS = new Buffer(0);
+let MINIMAP_MARKERS = Buffer.alloc(0);
 const createBinaryMarkers = (floorID) => {
 	return new Promise((resolve, reject) => {
 		const markers = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);

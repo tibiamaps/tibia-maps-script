@@ -10,7 +10,7 @@ const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 	// https://tibiamaps.io/guides/map-file-format#pathfinding-data
 	const data = pixels.data;
 	let hasData = isGroundFloor;
-	const buffer = new Buffer(0x10000);
+	const buffer = Buffer.alloc(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
 	while (++xIndex < 256) {

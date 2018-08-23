@@ -7,7 +7,7 @@ const pixelDataToMapBuffer = (pixels) => {
 	const data = pixels.data;
 	// https://tibiamaps.io/guides/map-file-format#visual-map-data
 	let hasData = false;
-	const buffer = new Buffer(0x10000);
+	const buffer = Buffer.alloc(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
 	while (++xIndex < 256) {

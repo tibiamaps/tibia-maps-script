@@ -21,14 +21,14 @@ const arrayToMinimapMarkerBuffer = (array) => {
 		);
 	});
 	// https://tibiamaps.io/guides/minimap-file-format#map-marker-data
-	let result = new Buffer(0);
+	let result = Buffer.alloc(0);
 	for (const marker of sorted) {
 		const encodedDescription = utf8.encode(marker.description);
 		const encodedDescriptionLength = encodedDescription.length;
 		const markerSize = 20 + encodedDescriptionLength;
 		// Assume x1, x2, x3 and y1, y2, y3 are all needed.
 		const coordinateSize = 10;
-		const markerBuffer = new Buffer(markerSize);
+		const markerBuffer = Buffer.alloc(markerSize);
 		markerBuffer.writeUInt8(0x0A, 0);
 		markerBuffer.writeUInt8(markerSize - 2, 1);
 		markerBuffer.writeUInt8(0x0A, 2);
