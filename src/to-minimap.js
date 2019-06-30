@@ -118,7 +118,7 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 	GLOBALS.dataDirectory = dataDirectory;
 	const bounds = JSON.parse(fs.readFileSync(`${dataDirectory}/bounds.json`));
 	GLOBALS.bounds = bounds;
-	GLOBALS.canvas = new Canvas(bounds.width, bounds.height);
+	GLOBALS.canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	GLOBALS.context = GLOBALS.canvas.getContext('2d');
 	const floorIDs = bounds.floorIDs;
 	try {

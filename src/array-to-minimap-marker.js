@@ -13,6 +13,7 @@ const coordinateToMinimapBytes = (x) => {
 };
 
 const arrayToMinimapMarkerBuffer = (array) => {
+	if (!array.sort) { array = []; }
 	// Sort markers by their `x`, then `y`, then `z`.
 	const sorted = array.sort((a, b) => {
 		return (

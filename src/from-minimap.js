@@ -219,9 +219,9 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 
 const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarkers) => {
 	GLOBALS.bounds = bounds;
-	GLOBALS.mapCanvas = new Canvas(bounds.width, bounds.height);
+	GLOBALS.mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
 	GLOBALS.mapContext = GLOBALS.mapCanvas.getContext('2d');
-	GLOBALS.pathCanvas = new Canvas(bounds.width, bounds.height);
+	GLOBALS.pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
 	GLOBALS.pathContext = GLOBALS.pathCanvas.getContext('2d');
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';

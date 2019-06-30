@@ -35,13 +35,14 @@
 	},
 	"dependencies": {
 		"argh": "^0.1.4",
-		"canvas": "^1.6.5",
-		"glob": "^7.1.1",
+		"canvas": "^2.5.0",
+		"glob": "^7.1.4",
 		"lodash.padstart": "^4.6.1",
 		"lodash.range": "^3.2.0",
 		"mkdirp": "^0.5.1",
 		"rimraf": "^2.6.1",
 		"sort-object": "^3.0.2",
+		"tibia-count-walkable-tiles": "^1.2.0",
 		"tibia-minimap-png": "^1.1.0",
 		"utf8": "^2.1.2",
 		"windows-1252": "^1.0.0"
