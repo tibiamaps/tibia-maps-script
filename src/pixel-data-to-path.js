@@ -27,13 +27,13 @@ const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 			let byteValue;
 			if (
 				(
-					r == unexploredPath.r &&
-					b == unexploredPath.b &&
-					g == unexploredPath.g
+					r === unexploredPath.r &&
+					b === unexploredPath.b &&
+					g === unexploredPath.g
 				) || (
-					r == unexploredPathAlternate.r &&
-					b == unexploredPathAlternate.b &&
-					g == unexploredPathAlternate.g
+					r === unexploredPathAlternate.r &&
+					b === unexploredPathAlternate.b &&
+					g === unexploredPathAlternate.g
 				)
 			) {
 				byteValue = unexploredPathByte;
@@ -41,11 +41,11 @@ const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 				// Verify that `r, `g`, and `b` are either equal or the non-walkable
 				// color.
 				console.assert(
-					(r == g && r == b) ||
+					(r === g && r === b) ||
 					(
-						r == nonWalkablePath.r &&
-						g == nonWalkablePath.g &&
-						b == nonWalkablePath.b
+						r === nonWalkablePath.r &&
+						g === nonWalkablePath.g &&
+						b === nonWalkablePath.b
 					),
 					`${r},${g},${b}`
 				);

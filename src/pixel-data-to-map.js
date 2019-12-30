@@ -1,6 +1,7 @@
 'use strict';
 
 const colors = require('./colors.js');
+const byColor = colors.byColor;
 const unexploredMapByte = colors.unexploredMapByte;
 
 const pixelDataToMapBuffer = (pixels) => {
@@ -23,10 +24,10 @@ const pixelDataToMapBuffer = (pixels) => {
 			//const a = data[offset + 3];
 			// Get the byte value that corresponds to this color.
 			const id = `${r},${g},${b}`;
-			const byteValue = colors.byColor[id];
+			const byteValue = byColor.get(id);
 			console.assert(byteValue != null, `Unknown color ID: ${id}`);
 			buffer.writeUInt8(byteValue, ++bufferIndex);
-			if (byteValue != unexploredMapByte) {
+			if (!hasData && byteValue !== unexploredMapByte) {
 				hasData = true;
 			}
 		}
