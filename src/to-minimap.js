@@ -11,7 +11,6 @@ const handleParallel = require('./handle-parallel.js');
 
 const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');
-const idToXyz = require('./id-to-xyz.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
 
@@ -42,6 +41,7 @@ const writeBuffer = (fileName, buffer) => {
 
 const forEachTile = (context, map, callback, name, floorID) => {
 	const isGroundFloor = floorID == '07';
+	const z = Number(floorID);
 	const bounds = GLOBALS.bounds;
 	const image = new Image();
 	image.src = map;
@@ -49,15 +49,13 @@ const forEachTile = (context, map, callback, name, floorID) => {
 	// Extract each 256×256px tile.
 	let yOffset = 0;
 	while (yOffset < bounds.height) {
-		const y = bounds.yMin + (yOffset / 256);
-		const yID = String(y).padStart(3, '0');
+		const y = bounds.yMin + yOffset;
 		let xOffset = 0;
 		while (xOffset < bounds.width) {
-			const x = bounds.xMin + (xOffset / 256);
-			const xID = String(x).padStart(3, '0');
+			const x = bounds.xMin + xOffset;
 			const pixels = context.getImageData(xOffset, yOffset, 256, 256);
 			const buffer = callback(pixels, isGroundFloor);
-			const id = `${xID}${yID}${floorID}`;
+			const id = `${x}_${y}_${z}`;
 			if (buffer) {
 				addResult(id, name, buffer);
 			}
@@ -127,14 +125,12 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 				data.pathBuffer = EMPTY_PATH_BUFFER;
 			}
 			// Generate the Tibia 11-compatible minimap PNGs.
-			const coords = idToXyz(id);
-			const minimapId = `${ coords.x * 256 }_${ coords.y * 256 }_${ coords.z }`;
 			writeBuffer(
-				`${outputPath}/Minimap_Color_${minimapId}.png`,
+				`${outputPath}/Minimap_Color_${id}.png`,
 				wrapColorData(data.mapBuffer, { overlayGrid })
 			);
 			writeBuffer(
-				`${outputPath}/Minimap_WaypointCost_${minimapId}.png`,
+				`${outputPath}/Minimap_WaypointCost_${id}.png`,
 				wrapWaypointData(data.pathBuffer)
 			);
 		}

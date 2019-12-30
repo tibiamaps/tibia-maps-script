@@ -127,8 +127,8 @@ const parseMarkerData = (buffer) => {
 const drawMapSection = async (mapContext, fileName) => {
 	const id = path.basename(fileName, '.png').replace(/^Minimap_Color_/, '');
 	const coordinates = minimapIdToAbsoluteXyz(id);
-	const xOffset = coordinates.x - GLOBALS.bounds.xMin * 256;
-	const yOffset = coordinates.y - GLOBALS.bounds.yMin * 256;
+	const xOffset = coordinates.x - GLOBALS.bounds.xMin;
+	const yOffset = coordinates.y - GLOBALS.bounds.yMin;
 	const buffer = await fsp.readFile(fileName);
 	const image = new Image();
 	image.src = buffer;
@@ -138,8 +138,8 @@ const drawMapSection = async (mapContext, fileName) => {
 const drawPathSection = async (pathContext, fileName) => {
 	const id = path.basename(fileName, '.png').replace(/^Minimap_WaypointCost_/, '');
 	const coordinates = minimapIdToAbsoluteXyz(id);
-	const xOffset = coordinates.x - GLOBALS.bounds.xMin * 256;
-	const yOffset = coordinates.y - GLOBALS.bounds.yMin * 256;
+	const xOffset = coordinates.x - GLOBALS.bounds.xMin;
+	const yOffset = coordinates.y - GLOBALS.bounds.yMin;
 	const buffer = await fsp.readFile(fileName);
 	const image = new Image();
 	image.src = buffer;
