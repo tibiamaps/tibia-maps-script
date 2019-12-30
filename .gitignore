@@ -2,6 +2,9 @@ data
 test/data
 test/data-without-markers
 
+# 0x flamecharts
+*.0x
+
 # Installed npm modules
 node_modules
 package-lock.json

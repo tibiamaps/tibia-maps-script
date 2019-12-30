@@ -20,12 +20,12 @@ const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
 
 const GLOBALS = {};
 
-const RESULTS = {};
+const RESULTS = new Map();
 const addResult = (id, type, result) => {
-	if (!RESULTS[id]) {
-		RESULTS[id] = {};
+	if (!RESULTS.has(id)) {
+		RESULTS.set(id, {});
 	}
-	const reference = RESULTS[id];
+	const reference = RESULTS.get(id);
 	reference[type] = result;
 };
 
@@ -126,8 +126,7 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 		if (includeMarkers) {
 			await handleSequence(floorIDs, createBinaryMarkers);
 		}
-		for (const id of Object.keys(RESULTS)) {
-			const data = RESULTS[id];
+		for (const [id, data] of RESULTS) {
 			if (!data.mapBuffer) {
 				data.mapBuffer = EMPTY_MAP_BUFFER;
 			}
