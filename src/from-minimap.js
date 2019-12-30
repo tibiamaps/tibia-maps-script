@@ -18,7 +18,7 @@ const iconsById = require('./icons.js').byId;
 const colors = require('./colors.js');
 const writeJson = require('./write-json.js');
 const saveCanvasToPng = require('./save-canvas-to-png.js');
-const handleSequence = require('./handle-sequence.js');
+const { handleSequence, handleParallel } = require('./handle-sequence.js');
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
 
 const minimapBytesToCoordinate = (x1, x2, x3) => {

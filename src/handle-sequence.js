@@ -6,4 +6,12 @@ const handleSequence = async (array, callback) => {
 	}
 };
 
-module.exports = handleSequence;
+const handleParallel = (array, callback) => {
+	const promises = array.map(element => callback(element));
+	return Promise.all(promises);
+};
+
+module.exports = {
+	handleSequence,
+	handleParallel,
+};

@@ -6,8 +6,7 @@ const Canvas = require('canvas');
 const Image = Canvas.Image;
 const { wrapColorData, wrapWaypointData } = require('tibia-minimap-png');
 
-const handleSequence = require('./handle-sequence.js');
-const writeJson = require('./write-json.js');
+const { handleParallel } = require('./handle-sequence.js');
 
 const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');
@@ -37,15 +36,15 @@ const writeBuffer = (fileName, buffer) => {
 	const writeStream = fs.createWriteStream(fileName);
 	writeStream.write(buffer);
 	writeStream.end();
-	console.log(`${fileName} created successfully.`);
+	//console.log(`${fileName} created successfully.`);
 };
 
-const forEachTile = (map, callback, name, floorID) => {
+const forEachTile = (context, map, callback, name, floorID) => {
 	const isGroundFloor = floorID == '07';
 	const bounds = GLOBALS.bounds;
 	const image = new Image();
 	image.src = map;
-	GLOBALS.context.drawImage(image, 0, 0, bounds.width, bounds.height);
+	context.drawImage(image, 0, 0, bounds.width, bounds.height);
 	// Extract each 256×256px tile.
 	let yOffset = 0;
 	while (yOffset < bounds.height) {
@@ -55,7 +54,7 @@ const forEachTile = (map, callback, name, floorID) => {
 		while (xOffset < bounds.width) {
 			const x = bounds.xMin + (xOffset / 256);
 			const xID = String(x).padStart(3, '0');
-			const pixels = GLOBALS.context.getImageData(xOffset, yOffset, 256, 256);
+			const pixels = context.getImageData(xOffset, yOffset, 256, 256);
 			const buffer = callback(pixels, isGroundFloor);
 			const id = `${xID}${yID}${floorID}`;
 			if (buffer) {
@@ -68,24 +67,30 @@ const forEachTile = (map, callback, name, floorID) => {
 };
 
 const createBinaryMap = (floorID) => {
+	const bounds = GLOBALS.bounds;
+	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
+	const context = canvas.getContext('2d');
 	return new Promise((resolve, reject) => {
 		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, (error, map) => {
 			if (error) {
 				throw new Error(error);
 			}
-			forEachTile(map, pixelDataToMapBuffer, 'mapBuffer', floorID);
+			forEachTile(context, map, pixelDataToMapBuffer, 'mapBuffer', floorID);
 			resolve();
 		});
 	});
 };
 
 const createBinaryPath = (floorID) => {
+	const bounds = GLOBALS.bounds;
+	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
+	const context = canvas.getContext('2d');
 	return new Promise((resolve, reject) => {
 		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, (error, map) => {
 			if (error) {
 				throw new Error(error);
 			}
-			forEachTile(map, pixelDataToPathBuffer, 'pathBuffer', floorID);
+			forEachTile(context, map, pixelDataToPathBuffer, 'pathBuffer', floorID);
 			resolve();
 		});
 	});
@@ -121,11 +126,14 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 	GLOBALS.context = GLOBALS.canvas.getContext('2d');
 	const floorIDs = bounds.floorIDs;
 	try {
-		await handleSequence(floorIDs, createBinaryMap);
-		await handleSequence(floorIDs, createBinaryPath);
+		const promises = [
+			handleParallel(floorIDs, createBinaryMap),
+			handleParallel(floorIDs, createBinaryPath),
+		];
 		if (includeMarkers) {
-			await handleSequence(floorIDs, createBinaryMarkers);
+			promises.push(handleParallel(floorIDs, createBinaryMarkers));
 		}
+		await Promise.all(promises);
 		for (const [id, data] of RESULTS) {
 			if (!data.mapBuffer) {
 				data.mapBuffer = EMPTY_MAP_BUFFER;

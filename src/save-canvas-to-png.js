@@ -10,7 +10,7 @@ const saveCanvasToPng = (fileName, canvas) => {
 			writeStream.write(chunk)
 		});
 		pngStream.on('end', () => {
-			console.log(`${fileName} created successfully.`);
+			//console.log(`${fileName} created successfully.`);
 			resolve();
 		});
 	});

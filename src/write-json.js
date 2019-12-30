@@ -7,7 +7,7 @@ const writeJson = (fileName, data) => {
 	const json = JSON.stringify(data, null, '\t');
 	writeStream.write(`${json}\n`);
 	writeStream.end();
-	console.log(`${fileName} created successfully.`);
+	//console.log(`${fileName} created successfully.`);
 };
 
 module.exports = writeJson;
