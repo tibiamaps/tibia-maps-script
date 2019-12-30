@@ -19,15 +19,6 @@ const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
 
 const GLOBALS = {};
 
-const RESULTS = new Map();
-const addResult = (id, type, result) => {
-	if (!RESULTS.has(id)) {
-		RESULTS.set(id, {});
-	}
-	const reference = RESULTS.get(id);
-	reference[type] = result;
-};
-
 const writeBuffer = (fileName, buffer) => {
 	if (buffer == null) {
 		console.log('Undefined buffer; skipping creating `' + fileName + '`');
@@ -57,7 +48,17 @@ const forEachTile = (context, map, callback, name, floorID) => {
 			const buffer = callback(pixels, isGroundFloor);
 			const id = `${x}_${y}_${z}`;
 			if (buffer) {
-				addResult(id, name, buffer);
+				if (name === 'mapBuffer') {
+					writeBuffer(
+						`${GLOBALS.outputPath}/Minimap_Color_${id}.png`,
+						wrapColorData(buffer, { overlayGrid: GLOBALS.overlayGrid })
+					);
+				} else if (name === 'pathBuffer') {
+					writeBuffer(
+						`${GLOBALS.outputPath}/Minimap_WaypointCost_${id}.png`,
+						wrapWaypointData(buffer)
+					);
+				}
 			}
 			xOffset += 256;
 		}
@@ -103,6 +104,8 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 		outputPath = 'minimap-new';
 	}
 	GLOBALS.dataDirectory = dataDirectory;
+	GLOBALS.outputPath = outputPath;
+	GLOBALS.overlayGrid = overlayGrid;
 	const bounds = JSON.parse(fs.readFileSync(`${dataDirectory}/bounds.json`));
 	GLOBALS.bounds = bounds;
 	GLOBALS.canvas = Canvas.createCanvas(bounds.width, bounds.height);
@@ -117,23 +120,10 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 			promises.push(handleParallel(floorIDs, createBinaryMarkers));
 		}
 		await Promise.all(promises);
-		for (const [id, data] of RESULTS) {
-			if (!data.mapBuffer) {
-				data.mapBuffer = EMPTY_MAP_BUFFER;
-			}
-			if (!data.pathBuffer) {
-				data.pathBuffer = EMPTY_PATH_BUFFER;
-			}
-			// Generate the Tibia 11-compatible minimap PNGs.
-			writeBuffer(
-				`${outputPath}/Minimap_Color_${id}.png`,
-				wrapColorData(data.mapBuffer, { overlayGrid })
-			);
-			writeBuffer(
-				`${outputPath}/Minimap_WaypointCost_${id}.png`,
-				wrapWaypointData(data.pathBuffer)
-			);
-		}
+		// TODO: We *could* keep track of all the files that have been written, and
+		// if any `Color` files don’t have a corresponding `WaypointCost` file or
+		// vice versa, we could then create it using `EMPTY_PATH_BUFFER` or
+		// `EMPTY_MAP_BUFFER`. Not sure if this is worth the hassle, though.
 		if (includeMarkers && MINIMAP_MARKERS.length) {
 			// The Tibia 11 installer doesn’t create the file if no markers are set.
 			writeBuffer(`${outputPath}/minimapmarkers.bin`, MINIMAP_MARKERS);
