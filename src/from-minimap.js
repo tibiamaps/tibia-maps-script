@@ -123,7 +123,7 @@ const parseMarkerData = (buffer) => {
 	return uniqueMarkers;
 };
 
-const drawMapSection = (fileName, includeMarkers) => {
+const drawMapSection = (mapContext, fileName) => {
 	return new Promise((resolve, reject) => {
 		const id = path.basename(fileName, '.png').replace(/^Minimap_Color_/, '');
 		const coordinates = minimapIdToAbsoluteXyz(id);
@@ -135,13 +135,13 @@ const drawMapSection = (fileName, includeMarkers) => {
 			}
 			const image = new Image();
 			image.src = buffer;
-			GLOBALS.mapContext.drawImage(image, xOffset, yOffset, 256, 256);
+			mapContext.drawImage(image, xOffset, yOffset, 256, 256);
 			resolve();
 		});
 	});
 };
 
-const drawPathSection = (fileName, includeMarkers) => {
+const drawPathSection = (pathContext, fileName) => {
 	return new Promise((resolve, reject) => {
 		const id = path.basename(fileName, '.png').replace(/^Minimap_WaypointCost_/, '');
 		const coordinates = minimapIdToAbsoluteXyz(id);
@@ -153,7 +153,7 @@ const drawPathSection = (fileName, includeMarkers) => {
 			}
 			const image = new Image();
 			image.src = buffer;
-			GLOBALS.pathContext.drawImage(image, xOffset, yOffset, 256, 256);
+			pathContext.drawImage(image, xOffset, yOffset, 256, 256);
 			resolve();
 		});
 	});
@@ -161,27 +161,25 @@ const drawPathSection = (fileName, includeMarkers) => {
 
 const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 	console.log(`Rendering floor ${floorID}…`);
-	const unexploredMap = colors.unexploredMap;
-	resetContext(
-		GLOBALS.mapContext,
-		`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
-	);
-	const unexploredPath = colors.unexploredPath;
-	resetContext(
-		GLOBALS.pathContext,
-		`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
-	);
 	const floorNumber = Number(floorID);
 	const pMap = new Promise((resolve, reject) => {
+		const bounds = GLOBALS.bounds;
+		const mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
+		const mapContext = mapCanvas.getContext('2d');	
+		const unexploredMap = colors.unexploredMap;
+		resetContext(
+			mapContext,
+			`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
+		);
 		glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`, async (error, files) => {
-			// Handle all map files for this floor sequentially.
+			// Handle all map files for this floor.
 			try {
 				await handleParallel(files, (fileName) => {
-					return drawMapSection(fileName, includeMarkers);
+					return drawMapSection(mapContext, fileName);
 				});
 				await saveCanvasToPng(
 					`${dataDirectory}/floor-${floorID}-map.png`,
-					GLOBALS.mapCanvas
+					mapCanvas
 				);
 				resolve();
 			} catch (exception) {
@@ -192,15 +190,23 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 	});
 
 	const pPath = new Promise((resolve, reject) => {
+		const bounds = GLOBALS.bounds;
+		const pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
+		const pathContext = pathCanvas.getContext('2d');
+		const unexploredPath = colors.unexploredPath;
+		resetContext(
+			pathContext,
+			`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
+		);
 		glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`, async (error, files) => {
-			// Handle all path files for this floor sequentially.
+			// Handle all path files for this floor.
 			try {
 				await handleParallel(files, (fileName) => {
-					return drawPathSection(fileName, includeMarkers);
+					return drawPathSection(pathContext, fileName);
 				});
 				await saveCanvasToPng(
 					`${dataDirectory}/floor-${floorID}-path.png`,
-					GLOBALS.pathCanvas
+					pathCanvas
 				);
 				resolve();
 			} catch (exception) {
@@ -215,10 +221,6 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 
 const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarkers) => {
 	GLOBALS.bounds = bounds;
-	GLOBALS.mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
-	GLOBALS.mapContext = GLOBALS.mapCanvas.getContext('2d');
-	GLOBALS.pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
-	GLOBALS.pathContext = GLOBALS.pathCanvas.getContext('2d');
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';
 	}
