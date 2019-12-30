@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const glob = require('glob');
 const path = require('path');
 
 const Canvas = require('canvas');
@@ -16,6 +15,7 @@ const resetContext = (context, fillStyle) => {
 
 const iconsById = require('./icons.js').byId;
 const colors = require('./colors.js');
+const glob = require('./glob-promise.js');
 const writeJson = require('./write-json.js');
 const saveCanvasToPng = require('./save-canvas-to-png.js');
 const handleParallel = require('./handle-parallel.js');
@@ -159,65 +159,53 @@ const drawPathSection = (pathContext, fileName) => {
 	});
 };
 
+const renderFloorMap = async (floorID, floorNumber, mapDirectory, dataDirectory) => {
+	const bounds = GLOBALS.bounds;
+	const mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
+	const mapContext = mapCanvas.getContext('2d');
+	const unexploredMap = colors.unexploredMap;
+	resetContext(
+		mapContext,
+		`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
+	);
+	// Handle all map files for this floor.
+	const files = await glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`);
+	await handleParallel(files, (fileName) => {
+		return drawMapSection(mapContext, fileName);
+	});
+	await saveCanvasToPng(
+		`${dataDirectory}/floor-${floorID}-map.png`,
+		mapCanvas
+	);
+};
+
+const renderFloorPath = async (floorID, floorNumber, mapDirectory, dataDirectory) => {
+	const bounds = GLOBALS.bounds;
+	const pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
+	const pathContext = pathCanvas.getContext('2d');
+	const unexploredPath = colors.unexploredPath;
+	resetContext(
+		pathContext,
+		`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
+	);
+	// Handle all path files for this floor.
+	const files = await glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`);
+	await handleParallel(files, (fileName) => {
+		return drawPathSection(pathContext, fileName);
+	});
+	await saveCanvasToPng(
+		`${dataDirectory}/floor-${floorID}-path.png`,
+		pathCanvas
+	);
+};
+
 const renderFloor = (floorID, mapDirectory, dataDirectory) => {
 	console.log(`Rendering floor ${floorID}…`);
 	const floorNumber = Number(floorID);
-
-	const pMap = new Promise((resolve, reject) => {
-		const bounds = GLOBALS.bounds;
-		const mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
-		const mapContext = mapCanvas.getContext('2d');	
-		const unexploredMap = colors.unexploredMap;
-		resetContext(
-			mapContext,
-			`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
-		);
-		glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`, async (error, files) => {
-			// Handle all map files for this floor.
-			try {
-				await handleParallel(files, (fileName) => {
-					return drawMapSection(mapContext, fileName);
-				});
-				await saveCanvasToPng(
-					`${dataDirectory}/floor-${floorID}-map.png`,
-					mapCanvas
-				);
-				resolve();
-			} catch (exception) {
-				console.error(exception.stack);
-				reject(exception);
-			}
-		});
-	});
-
-	const pPath = new Promise((resolve, reject) => {
-		const bounds = GLOBALS.bounds;
-		const pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
-		const pathContext = pathCanvas.getContext('2d');
-		const unexploredPath = colors.unexploredPath;
-		resetContext(
-			pathContext,
-			`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
-		);
-		glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`, async (error, files) => {
-			// Handle all path files for this floor.
-			try {
-				await handleParallel(files, (fileName) => {
-					return drawPathSection(pathContext, fileName);
-				});
-				await saveCanvasToPng(
-					`${dataDirectory}/floor-${floorID}-path.png`,
-					pathCanvas
-				);
-				resolve();
-			} catch (exception) {
-				console.error(exception.stack);
-				reject(exception);
-			}
-		});
-	});
-
-	return Promise.all([pMap, pPath]);
+	return Promise.all([
+		renderFloorMap(floorID, floorNumber, mapDirectory, dataDirectory),
+		renderFloorPath(floorID, floorNumber, mapDirectory, dataDirectory),
+	]);
 };
 
 const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarkers) => {
