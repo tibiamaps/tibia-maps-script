@@ -18,7 +18,7 @@ const iconsById = require('./icons.js').byId;
 const colors = require('./colors.js');
 const writeJson = require('./write-json.js');
 const saveCanvasToPng = require('./save-canvas-to-png.js');
-const { handleSequence, handleParallel } = require('./handle-sequence.js');
+const handleParallel = require('./handle-parallel.js');
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
 
 const minimapBytesToCoordinate = (x1, x2, x3) => {
@@ -159,9 +159,10 @@ const drawPathSection = (pathContext, fileName) => {
 	});
 };
 
-const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
+const renderFloor = (floorID, mapDirectory, dataDirectory) => {
 	console.log(`Rendering floor ${floorID}…`);
 	const floorNumber = Number(floorID);
+
 	const pMap = new Promise((resolve, reject) => {
 		const bounds = GLOBALS.bounds;
 		const mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
@@ -227,8 +228,8 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
-	await handleSequence(bounds.floorIDs, (floorID) => {
-		return renderFloor(floorID, mapDirectory, dataDirectory, includeMarkers);
+	await handleParallel(bounds.floorIDs, (floorID) => {
+		return renderFloor(floorID, mapDirectory, dataDirectory);
 	});
 	const fileName = `${mapDirectory}/minimapmarkers.bin`;
 	if (!fs.existsSync(fileName)) {
