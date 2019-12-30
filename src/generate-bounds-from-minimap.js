@@ -4,7 +4,7 @@ const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
 
-const writeJSON = require('./write-json.js');
+const writeJson = require('./write-json.js');
 
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
 
@@ -21,7 +21,7 @@ const generateBoundsFromMinimap = (mapsDirectory, dataDirectory) => {
 			};
 			const floorIDs = [];
 			for (const file of files) {
-				const id = path.basename(file);
+				const id = path.basename(file, '.png').replace(/^Minimap_(?:Color|WaypointCost)_/, '');
 				const coordinates = minimapIdToAbsoluteXyz(id);
 				const x = Math.floor(coordinates.x / 256);
 				const y = Math.floor(coordinates.y / 256);
@@ -52,7 +52,7 @@ const generateBoundsFromMinimap = (mapsDirectory, dataDirectory) => {
 			bounds.width = (1 + bounds.xMax - bounds.xMin) * 256;
 			bounds.height = (1 + bounds.yMax - bounds.yMin) * 256;
 			bounds.floorIDs = floorIDs.sort();
-			writeJSON(`${dataDirectory}/bounds.json`, bounds);
+			writeJson(`${dataDirectory}/bounds.json`, bounds);
 			resolve(bounds);
 		});
 	});

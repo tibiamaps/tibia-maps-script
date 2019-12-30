@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 
-const saveCanvasToPNG = (fileName, canvas) => {
+const saveCanvasToPng = (fileName, canvas) => {
 	return new Promise((resolve, reject) => {
 		const writeStream = fs.createWriteStream(fileName);
 		const pngStream = canvas.pngStream();
@@ -16,4 +16,4 @@ const saveCanvasToPNG = (fileName, canvas) => {
 	});
 };
 
-module.exports = saveCanvasToPNG;
+module.exports = saveCanvasToPng;

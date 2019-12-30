@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 
-const writeJSON = (fileName, data) => {
+const writeJson = (fileName, data) => {
 	const writeStream = fs.createWriteStream(fileName);
 	const json = JSON.stringify(data, null, '\t');
 	writeStream.write(`${json}\n`);
@@ -10,4 +10,4 @@ const writeJSON = (fileName, data) => {
 	console.log(`${fileName} created successfully.`);
 };
 
-module.exports = writeJSON;
+module.exports = writeJson;

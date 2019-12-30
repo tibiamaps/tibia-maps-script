@@ -7,7 +7,7 @@ const Image = Canvas.Image;
 const { wrapColorData, wrapWaypointData } = require('tibia-minimap-png');
 
 const handleSequence = require('./handle-sequence.js');
-const writeJSON = require('./write-json.js');
+const writeJson = require('./write-json.js');
 
 const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');

@@ -17,8 +17,8 @@ const resetContext = (context, fillStyle) => {
 
 const iconsById = require('./icons.js').byId;
 const colors = require('./colors.js');
-const writeJSON = require('./write-json.js');
-const saveCanvasToPNG = require('./save-canvas-to-png.js');
+const writeJson = require('./write-json.js');
+const saveCanvasToPng = require('./save-canvas-to-png.js');
 const handleSequence = require('./handle-sequence.js');
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
 
@@ -173,7 +173,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 				await handleSequence(files, (fileName) => {
 					return drawMapSection(fileName, includeMarkers);
 				});
-				await saveCanvasToPNG(
+				await saveCanvasToPng(
 					`${dataDirectory}/floor-${floorID}-map.png`,
 					GLOBALS.mapCanvas
 				);
@@ -192,7 +192,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 				await handleSequence(files, (fileName) => {
 					return drawPathSection(fileName, includeMarkers);
 				});
-				await saveCanvasToPNG(
+				await saveCanvasToPng(
 					`${dataDirectory}/floor-${floorID}-path.png`,
 					GLOBALS.pathCanvas
 				);
@@ -204,15 +204,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 		});
 	});
 
-	return new Promise(async (resolve, reject) => {
-		try {
-			await pMap;
-			await pPath;
-			resolve();
-		} catch (exception) {
-			reject();
-		}
-	});
+	return Promise.all([pMap, pPath]);
 };
 
 const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarkers) => {
@@ -250,7 +242,7 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 		}
 		for (const floorID of bounds.floorIDs) {
 			const markers = markersByFloor.get(floorID);
-			writeJSON(
+			writeJson(
 				`${dataDirectory}/floor-${floorID}-markers.json`,
 				includeMarkers && markers ? markers : []
 			);
