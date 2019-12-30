@@ -6,7 +6,6 @@ const path = require('path');
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
-const sortObject = require('sort-object');
 const utf8 = require('utf8');
 
 const GLOBALS = {};
@@ -93,7 +92,14 @@ const parseMarkerData = (buffer) => {
 		console.assert(buffer[index++] === 0x20);
 		console.assert(buffer[index++] === 0x00);
 
-		const sorted = sortObject(marker);
+		// Create a sorted-by-key version of the marker object.
+		const sorted = {
+			description: marker.description,
+			icon: marker.icon,
+			x: marker.x,
+			y: marker.y,
+			z: marker.z,
+		};
 		markers.push(sorted);
 	}
 

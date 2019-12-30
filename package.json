@@ -39,7 +39,6 @@
 		"glob": "^7.1.4",
 		"mkdirp": "^0.5.1",
 		"rimraf": "^2.6.1",
-		"sort-object": "^3.0.2",
 		"tibia-count-walkable-tiles": "^1.2.0",
 		"tibia-minimap-png": "^1.1.0",
 		"utf8": "^2.1.2",
