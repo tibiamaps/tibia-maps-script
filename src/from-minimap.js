@@ -7,7 +7,6 @@ const path = require('path');
 const padStart = require('lodash.padstart');
 const Canvas = require('canvas');
 const Image = Canvas.Image;
-const range = require('lodash.range');
 const sortObject = require('sort-object');
 const utf8 = require('utf8');
 
@@ -17,7 +16,7 @@ const resetContext = (context, fillStyle) => {
 	context.fillRect(0, 0, GLOBALS.bounds.width, GLOBALS.bounds.height);
 };
 
-const icons = require('./icons.js');
+const iconsById = require('./icons.js').byId;
 const colors = require('./colors.js');
 const writeJSON = require('./write-json.js');
 const saveCanvasToPNG = require('./save-canvas-to-png.js');
@@ -79,7 +78,7 @@ const parseMarkerData = (buffer) => {
 		console.assert(buffer[index++] === 0x10);
 		// The next byte represents the image ID of the marker icon.
 		const imageID = buffer.readUInt8(index++, 1);
-		marker.icon = icons.byID[imageID];
+		marker.icon = iconsById.get(imageID);
 		// The next byte is 0x1A.
 		console.assert(buffer[index++] === 0x1A);
 		// The next byte indicates the size of the string that follows.

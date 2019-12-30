@@ -38,7 +38,6 @@
 		"canvas": "^2.5.0",
 		"glob": "^7.1.4",
 		"lodash.padstart": "^4.6.1",
-		"lodash.range": "^3.2.0",
 		"mkdirp": "^0.5.1",
 		"rimraf": "^2.6.1",
 		"sort-object": "^3.0.2",
