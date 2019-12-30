@@ -176,7 +176,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 		glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`, async (error, files) => {
 			// Handle all map files for this floor sequentially.
 			try {
-				await handleSequence(files, (fileName) => {
+				await handleParallel(files, (fileName) => {
 					return drawMapSection(fileName, includeMarkers);
 				});
 				await saveCanvasToPng(
@@ -195,7 +195,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory, includeMarkers) => {
 		glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`, async (error, files) => {
 			// Handle all path files for this floor sequentially.
 			try {
-				await handleSequence(files, (fileName) => {
+				await handleParallel(files, (fileName) => {
 					return drawPathSection(fileName, includeMarkers);
 				});
 				await saveCanvasToPng(
