@@ -4,7 +4,6 @@ const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
 
-const padStart = require('lodash.padstart');
 const Canvas = require('canvas');
 const Image = Canvas.Image;
 const sortObject = require('sort-object');
@@ -242,7 +241,7 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 		const allMarkers = parseMarkerData(buffer);
 		const markersByFloor = new Map();
 		for (const marker of allMarkers) {
-			const floorID = padStart(marker.z, 2, '0');
+			const floorID = String(marker.z).padStart(2, '0');
 			if (markersByFloor.has(floorID)) {
 				markersByFloor.get(floorID).push(marker);
 			} else {

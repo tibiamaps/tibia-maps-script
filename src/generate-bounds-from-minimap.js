@@ -4,8 +4,6 @@ const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
 
-const padStart = require('lodash.padstart');
-
 const writeJSON = require('./write-json.js');
 
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
@@ -46,7 +44,7 @@ const generateBoundsFromMinimap = (mapsDirectory, dataDirectory) => {
 				if (bounds.zMax < z) {
 					bounds.zMax = z;
 				}
-				const floorID = padStart(z, 2, '0');
+				const floorID = String(z).padStart(2, '0');
 				if (floorIDs.indexOf(floorID) == -1) {
 					floorIDs.push(floorID);
 				}
