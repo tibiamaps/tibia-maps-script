@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const fsp = fs.promises;
 const path = require('path');
 
 const Canvas = require('canvas');
@@ -123,40 +124,26 @@ const parseMarkerData = (buffer) => {
 	return uniqueMarkers;
 };
 
-const drawMapSection = (mapContext, fileName) => {
-	return new Promise((resolve, reject) => {
-		const id = path.basename(fileName, '.png').replace(/^Minimap_Color_/, '');
-		const coordinates = minimapIdToAbsoluteXyz(id);
-		const xOffset = coordinates.x - GLOBALS.bounds.xMin * 256;
-		const yOffset = coordinates.y - GLOBALS.bounds.yMin * 256;
-		fs.readFile(fileName, (error, buffer) => {
-			if (error) {
-				reject(error);
-			}
-			const image = new Image();
-			image.src = buffer;
-			mapContext.drawImage(image, xOffset, yOffset, 256, 256);
-			resolve();
-		});
-	});
+const drawMapSection = async (mapContext, fileName) => {
+	const id = path.basename(fileName, '.png').replace(/^Minimap_Color_/, '');
+	const coordinates = minimapIdToAbsoluteXyz(id);
+	const xOffset = coordinates.x - GLOBALS.bounds.xMin * 256;
+	const yOffset = coordinates.y - GLOBALS.bounds.yMin * 256;
+	const buffer = await fsp.readFile(fileName);
+	const image = new Image();
+	image.src = buffer;
+	mapContext.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
-const drawPathSection = (pathContext, fileName) => {
-	return new Promise((resolve, reject) => {
-		const id = path.basename(fileName, '.png').replace(/^Minimap_WaypointCost_/, '');
-		const coordinates = minimapIdToAbsoluteXyz(id);
-		const xOffset = coordinates.x - GLOBALS.bounds.xMin * 256;
-		const yOffset = coordinates.y - GLOBALS.bounds.yMin * 256;
-		fs.readFile(fileName, (error, buffer) => {
-			if (error) {
-				reject(error);
-			}
-			const image = new Image();
-			image.src = buffer;
-			pathContext.drawImage(image, xOffset, yOffset, 256, 256);
-			resolve();
-		});
-	});
+const drawPathSection = async (pathContext, fileName) => {
+	const id = path.basename(fileName, '.png').replace(/^Minimap_WaypointCost_/, '');
+	const coordinates = minimapIdToAbsoluteXyz(id);
+	const xOffset = coordinates.x - GLOBALS.bounds.xMin * 256;
+	const yOffset = coordinates.y - GLOBALS.bounds.yMin * 256;
+	const buffer = await fsp.readFile(fileName);
+	const image = new Image();
+	image.src = buffer;
+	pathContext.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
 const renderFloorMap = async (floorID, floorNumber, mapDirectory, dataDirectory) => {
@@ -223,28 +210,24 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 	if (!fs.existsSync(fileName)) {
 		return;
 	}
-	fs.readFile(fileName, (error, buffer) => {
-		if (error) {
-			throw new Error(error);
+	const buffer = await fsp.readFile(fileName);
+	const allMarkers = parseMarkerData(buffer);
+	const markersByFloor = new Map();
+	for (const marker of allMarkers) {
+		const floorID = String(marker.z).padStart(2, '0');
+		if (markersByFloor.has(floorID)) {
+			markersByFloor.get(floorID).push(marker);
+		} else {
+			markersByFloor.set(floorID, [marker]);
 		}
-		const allMarkers = parseMarkerData(buffer);
-		const markersByFloor = new Map();
-		for (const marker of allMarkers) {
-			const floorID = String(marker.z).padStart(2, '0');
-			if (markersByFloor.has(floorID)) {
-				markersByFloor.get(floorID).push(marker);
-			} else {
-				markersByFloor.set(floorID, [marker]);
-			}
-		}
-		for (const floorID of bounds.floorIDs) {
-			const markers = markersByFloor.get(floorID);
-			writeJson(
-				`${dataDirectory}/floor-${floorID}-markers.json`,
-				includeMarkers && markers ? markers : []
-			);
-		}
-	});
+	}
+	for (const floorID of bounds.floorIDs) {
+		const markers = markersByFloor.get(floorID);
+		writeJson(
+			`${dataDirectory}/floor-${floorID}-markers.json`,
+			includeMarkers && markers ? markers : []
+		);
+	}
 };
 
 module.exports = convertFromMaps;

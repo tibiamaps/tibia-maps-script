@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const fsp = fs.promises;
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
@@ -66,50 +67,34 @@ const forEachTile = (context, map, callback, name, floorID) => {
 	}
 };
 
-const createBinaryMap = (floorID) => {
+const createBinaryMap = async (floorID) => {
 	const bounds = GLOBALS.bounds;
 	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const context = canvas.getContext('2d');
-	return new Promise((resolve, reject) => {
-		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`, (error, map) => {
-			if (error) {
-				throw new Error(error);
-			}
-			forEachTile(context, map, pixelDataToMapBuffer, 'mapBuffer', floorID);
-			resolve();
-		});
-	});
+	const map = await fsp.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`);
+	forEachTile(context, map, pixelDataToMapBuffer, 'mapBuffer', floorID);
 };
 
-const createBinaryPath = (floorID) => {
+const createBinaryPath = async (floorID) => {
 	const bounds = GLOBALS.bounds;
 	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const context = canvas.getContext('2d');
-	return new Promise((resolve, reject) => {
-		fs.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`, (error, map) => {
-			if (error) {
-				throw new Error(error);
-			}
-			forEachTile(context, map, pixelDataToPathBuffer, 'pathBuffer', floorID);
-			resolve();
-		});
-	});
+	const map = await fsp.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`);
+	forEachTile(context, map, pixelDataToPathBuffer, 'pathBuffer', floorID);
 };
 
 let MINIMAP_MARKERS = Buffer.alloc(0);
-const createBinaryMarkers = (floorID) => {
-	return new Promise((resolve, reject) => {
-		const markers = require(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`);
-		const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
-		// TODO: To match the Tibia installer’s import functionality, the markers
-		// are supposed to be ordered by their `x` coordinate value, then by
-		// their `y` coordinate value, in ascending order.
-		MINIMAP_MARKERS = Buffer.concat([
-			MINIMAP_MARKERS,
-			minimapMarkers
-		]);
-		resolve();
-	});
+const createBinaryMarkers = async (floorID) => {
+	const json = await fsp.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`, 'utf8');
+	const markers = JSON.parse(json);
+	const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
+	// TODO: To match the Tibia installer’s import functionality, the markers
+	// are supposed to be ordered by their `x` coordinate value, then by
+	// their `y` coordinate value, in ascending order.
+	MINIMAP_MARKERS = Buffer.concat([
+		MINIMAP_MARKERS,
+		minimapMarkers
+	]);
 };
 
 const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overlayGrid) => {
