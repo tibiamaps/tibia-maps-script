@@ -24,13 +24,10 @@ const writeBuffer = (fileName, buffer) => {
 		console.log('Undefined buffer; skipping creating `' + fileName + '`');
 		return;
 	}
-	const writeStream = fs.createWriteStream(fileName);
-	writeStream.write(buffer);
-	writeStream.end();
-	//console.log(`${fileName} created successfully.`);
+	return fsp.writeFile(fileName, buffer);
 };
 
-const forEachTile = (context, map, callback, name, floorID) => {
+const forEachTile = (context, map, createBufferCallback, writeBufferCallback, floorID) => {
 	const isGroundFloor = floorID == '07';
 	const z = Number(floorID);
 	const bounds = GLOBALS.bounds;
@@ -45,20 +42,10 @@ const forEachTile = (context, map, callback, name, floorID) => {
 		while (xOffset < bounds.width) {
 			const x = bounds.xMin + xOffset;
 			const pixels = context.getImageData(xOffset, yOffset, 256, 256);
-			const buffer = callback(pixels, isGroundFloor);
+			const buffer = createBufferCallback(pixels, isGroundFloor);
 			const id = `${x}_${y}_${z}`;
 			if (buffer) {
-				if (name === 'mapBuffer') {
-					writeBuffer(
-						`${GLOBALS.outputPath}/Minimap_Color_${id}.png`,
-						wrapColorData(buffer, { overlayGrid: GLOBALS.overlayGrid })
-					);
-				} else if (name === 'pathBuffer') {
-					writeBuffer(
-						`${GLOBALS.outputPath}/Minimap_WaypointCost_${id}.png`,
-						wrapWaypointData(buffer)
-					);
-				}
+				writeBufferCallback(buffer, id);
 			}
 			xOffset += 256;
 		}
@@ -71,7 +58,14 @@ const createBinaryMap = async (floorID) => {
 	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const context = canvas.getContext('2d');
 	const map = await fsp.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-map.png`);
-	forEachTile(context, map, pixelDataToMapBuffer, 'mapBuffer', floorID);
+	forEachTile(context, map, pixelDataToMapBuffer, writeBinaryMapBuffer, floorID);
+};
+
+const writeBinaryMapBuffer = (buffer, id) => {
+	GLOBALS.ioPromises.push(writeBuffer(
+		`${GLOBALS.outputPath}/Minimap_Color_${id}.png`,
+		wrapColorData(buffer, { overlayGrid: GLOBALS.overlayGrid })
+	));
 };
 
 const createBinaryPath = async (floorID) => {
@@ -79,7 +73,14 @@ const createBinaryPath = async (floorID) => {
 	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const context = canvas.getContext('2d');
 	const map = await fsp.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-path.png`);
-	forEachTile(context, map, pixelDataToPathBuffer, 'pathBuffer', floorID);
+	forEachTile(context, map, pixelDataToPathBuffer, writeBinaryPathBuffer, floorID);
+};
+
+const writeBinaryPathBuffer = (buffer, id) => {
+	GLOBALS.ioPromises.push(writeBuffer(
+		`${GLOBALS.outputPath}/Minimap_WaypointCost_${id}.png`,
+		wrapWaypointData(buffer)
+	));
 };
 
 let MINIMAP_MARKERS = Buffer.alloc(0);
@@ -106,28 +107,31 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 	GLOBALS.dataDirectory = dataDirectory;
 	GLOBALS.outputPath = outputPath;
 	GLOBALS.overlayGrid = overlayGrid;
+	GLOBALS.ioPromises = [];
 	const bounds = JSON.parse(fs.readFileSync(`${dataDirectory}/bounds.json`));
 	GLOBALS.bounds = bounds;
 	GLOBALS.canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	GLOBALS.context = GLOBALS.canvas.getContext('2d');
 	const floorIDs = bounds.floorIDs;
 	try {
-		const promises = [
+		const bufferPromises = [
 			handleParallel(floorIDs, createBinaryMap),
 			handleParallel(floorIDs, createBinaryPath),
 		];
 		if (includeMarkers) {
-			promises.push(handleParallel(floorIDs, createBinaryMarkers));
+			bufferPromises.push(handleParallel(floorIDs, createBinaryMarkers));
 		}
-		await Promise.all(promises);
+		await Promise.all(bufferPromises);
 		// TODO: We *could* keep track of all the files that have been written, and
 		// if any `Color` files don’t have a corresponding `WaypointCost` file or
 		// vice versa, we could then create it using `EMPTY_PATH_BUFFER` or
 		// `EMPTY_MAP_BUFFER`. Not sure if this is worth the hassle, though.
 		if (includeMarkers && MINIMAP_MARKERS.length) {
 			// The Tibia 11 installer doesn’t create the file if no markers are set.
-			writeBuffer(`${outputPath}/minimapmarkers.bin`, MINIMAP_MARKERS);
+			GLOBALS.ioPromises.push(writeBuffer(`${outputPath}/minimapmarkers.bin`, MINIMAP_MARKERS));
 		}
+		// Wait for all file operations to complete.
+		await Promise.all(GLOBALS.ioPromises);
 	} catch (exception) {
 		console.error(exception.stack);
 		reject(exception);
