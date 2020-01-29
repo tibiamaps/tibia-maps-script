@@ -33,6 +33,7 @@ const main = async () => {
 		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`);
+		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only`);
 		process.exit(1);
 	}
 
@@ -62,10 +63,13 @@ const main = async () => {
 			argv['output-dir'] = 'data';
 		}
 		const dataDirectory = path.resolve(String(argv['output-dir']));
-		await emptyDirectory(dataDirectory);
+		const markersOnly = argv['markers-only'];
+		if (!markersOnly) {
+			await emptyDirectory(dataDirectory);
+		}
 		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory);
 		convertFromMinimap(
-			bounds, mapsDirectory, dataDirectory, !excludeMarkers
+			bounds, mapsDirectory, dataDirectory, !excludeMarkers, markersOnly
 		);
 		return;
 	}

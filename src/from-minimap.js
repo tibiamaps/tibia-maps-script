@@ -195,7 +195,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory) => {
 	]);
 };
 
-const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarkers) => {
+const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly) => {
 	GLOBALS.bounds = bounds;
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';
@@ -203,9 +203,11 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
-	await handleParallel(bounds.floorIDs, (floorID) => {
-		return renderFloor(floorID, mapDirectory, dataDirectory);
-	});
+	if (!markersOnly) {
+		await handleParallel(bounds.floorIDs, (floorID) => {
+			return renderFloor(floorID, mapDirectory, dataDirectory);
+		});
+	}
 	const fileName = `${mapDirectory}/minimapmarkers.bin`;
 	if (!fs.existsSync(fileName)) {
 		return;
@@ -230,4 +232,4 @@ const convertFromMaps = async (bounds, mapDirectory, dataDirectory, includeMarke
 	}
 };
 
-module.exports = convertFromMaps;
+module.exports = convertFromMinimap;
