@@ -89,9 +89,11 @@ const parseMarkerData = (buffer) => {
 		marker.description = utf8.decode(
 			descriptionBuffer.toString('binary')
 		);
-		// The byte sequence 0x20 0x00 marks the end of the marker.
-		console.assert(buffer[index++] === 0x20);
-		console.assert(buffer[index++] === 0x00);
+		// The next few bytes are usually 0x20 0x00, marking the end of the marker.
+		// However, there are cases where the client produces a different format
+		// for reasons unknown.
+		// https://github.com/tibiamaps/tibia-maps-script/issues/21
+		while (buffer[index] !== undefined && buffer[index] !== 0x0A) index++;
 
 		// Create a sorted-by-key version of the marker object.
 		const sorted = {
