@@ -34,14 +34,14 @@
 		"test": "test/test.sh"
 	},
 	"dependencies": {
-		"argh": "^0.1.4",
-		"canvas": "^2.5.0",
-		"glob": "^7.1.4",
-		"mkdirp": "^0.5.1",
-		"rimraf": "^2.6.1",
+		"argh": "^1.0.0",
+		"canvas": "^2.6.1",
+		"glob": "^7.1.6",
+		"mkdirp": "^1.0.4",
+		"rimraf": "^3.0.2",
 		"tibia-count-walkable-tiles": "^1.2.0",
 		"tibia-minimap-png": "^1.1.0",
-		"utf8": "^2.1.2",
+		"utf8": "^3.0.0",
 		"windows-1252": "^1.0.0"
 	}
 }

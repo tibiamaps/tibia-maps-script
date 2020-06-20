@@ -5,7 +5,7 @@
 const path = require('path');
 
 const argv = require('argh').argv;
-const mkdirp = require('mkdirp');
+const fsp = require('fs').promises;
 const rimraf = require('rimraf');
 
 const convertFromMinimap = require('../src/from-minimap.js');
@@ -16,7 +16,7 @@ const info = require('../package.json');
 const emptyDirectory = (path) => {
 	return new Promise((resolve, reject) => {
 		rimraf(`${path}/*`, () => {
-			mkdirp(path, () => {
+			fsp.mkdir(path, { recursive: true }).then(() => {
 				resolve();
 			});
 		});
@@ -67,7 +67,7 @@ const main = async () => {
 		if (!markersOnly) {
 			await emptyDirectory(dataDirectory);
 		}
-		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory);
+		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory, !markersOnly);
 		convertFromMinimap(
 			bounds, mapsDirectory, dataDirectory, !excludeMarkers, markersOnly
 		);
