@@ -67,7 +67,7 @@ const main = async () => {
 		if (!markersOnly) {
 			await emptyDirectory(dataDirectory);
 		}
-		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory);
+		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory, !markersOnly);
 		convertFromMinimap(
 			bounds, mapsDirectory, dataDirectory, !excludeMarkers, markersOnly
 		);

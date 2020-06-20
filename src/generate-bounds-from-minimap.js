@@ -7,7 +7,7 @@ const writeJson = require('./write-json.js');
 
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
 
-const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory) => {
+const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory, writeToDisk) => {
 	const files = await glob(`${mapsDirectory}/*.png`);
 	const bounds = {
 		xMin: +Infinity,
@@ -48,7 +48,9 @@ const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory) => {
 	bounds.width = 256 + bounds.xMax - bounds.xMin;
 	bounds.height = 256 + bounds.yMax - bounds.yMin;
 	bounds.floorIDs = floorIDs.sort();
-	writeJson(`${dataDirectory}/bounds.json`, bounds);
+	if (writeToDisk) {
+		writeJson(`${dataDirectory}/bounds.json`, bounds);
+	}
 	return bounds;
 };
 
