@@ -4,7 +4,7 @@
 
 ## Installation
 
-**Note:** [Node.js v6+](https://nodejs.org/en/) is required.
+**Note:** Use the [expected](https://github.com/tibiamaps/tibia-maps-script/blob/master/.nvmrc) Node.js version!
 
 ```sh
 npm install -g tibia-maps
