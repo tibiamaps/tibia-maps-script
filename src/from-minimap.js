@@ -14,13 +14,14 @@ const resetContext = (context, fillStyle) => {
 	context.fillRect(0, 0, GLOBALS.bounds.width, GLOBALS.bounds.height);
 };
 
-const iconsById = require('./icons.js').byId;
 const colors = require('./colors.js');
 const glob = require('./glob-promise.js');
-const writeJson = require('./write-json.js');
-const saveCanvasToPng = require('./save-canvas-to-png.js');
 const handleParallel = require('./handle-parallel.js');
+const iconsById = require('./icons.js').byId;
 const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
+const saveCanvasToPng = require('./save-canvas-to-png.js');
+const sortMarkers = require('./sort-markers.js');
+const writeJson = require('./write-json.js');
 
 const minimapBytesToCoordinate = (x1, x2, x3) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
@@ -106,14 +107,7 @@ const parseMarkerData = (buffer) => {
 		markers.push(sorted);
 	}
 
-	// Sort markers so they start in the top left, then go from top to bottom.
-	// Example:
-	//     · 2 · 4 · · ·
-	//     1 · 3 · · · 7
-	//     · · · 5 · 6 ·
-	markers.sort((a, b) => {
-		return (a.x * 100000 + a.y) - (b.x * 100000 + b.y);
-	});
+	sortMarkers(markers);
 
 	// Remove duplicate markers.
 	const set = new Set();
@@ -216,22 +210,10 @@ const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMa
 	}
 	const buffer = await fsp.readFile(fileName);
 	const allMarkers = parseMarkerData(buffer);
-	const markersByFloor = new Map();
-	for (const marker of allMarkers) {
-		const floorID = String(marker.z).padStart(2, '0');
-		if (markersByFloor.has(floorID)) {
-			markersByFloor.get(floorID).push(marker);
-		} else {
-			markersByFloor.set(floorID, [marker]);
-		}
-	}
-	for (const floorID of bounds.floorIDs) {
-		const markers = markersByFloor.get(floorID);
-		writeJson(
-			`${dataDirectory}/floor-${floorID}-markers.json`,
-			includeMarkers && markers ? markers : []
-		);
-	}
+	writeJson(
+		`${dataDirectory}/markers.json`,
+		includeMarkers && allMarkers ? allMarkers : []
+	);
 };
 
 module.exports = convertFromMinimap;

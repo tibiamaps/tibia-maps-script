@@ -84,17 +84,15 @@ const writeBinaryPathBuffer = (buffer, id) => {
 };
 
 let MINIMAP_MARKERS = Buffer.alloc(0);
-const createBinaryMarkers = async (floorID) => {
-	const json = await fsp.readFile(`${GLOBALS.dataDirectory}/floor-${floorID}-markers.json`, 'utf8');
+const createBinaryMarkers = async () => {
+	const json = await fsp.readFile(`${GLOBALS.dataDirectory}/markers.json`, 'utf8');
 	const markers = JSON.parse(json);
 	const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
 	// TODO: To match the Tibia installer’s import functionality, the markers
 	// are supposed to be ordered by their `x` coordinate value, then by
 	// their `y` coordinate value, in ascending order.
-	MINIMAP_MARKERS = Buffer.concat([
-		MINIMAP_MARKERS,
-		minimapMarkers
-	]);
+	MINIMAP_MARKERS = minimapMarkers;
+	return minimapMarkers;
 };
 
 const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overlayGrid) => {
@@ -119,7 +117,7 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 			handleParallel(floorIDs, createBinaryPath),
 		];
 		if (includeMarkers) {
-			bufferPromises.push(handleParallel(floorIDs, createBinaryMarkers));
+			bufferPromises.push(createBinaryMarkers());
 		}
 		await Promise.all(bufferPromises);
 		// TODO: We *could* keep track of all the files that have been written, and

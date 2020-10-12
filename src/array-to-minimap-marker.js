@@ -3,6 +3,7 @@
 const utf8 = require('utf8');
 
 const iconsByName = require('./icons.js').byName;
+const sortMarkers = require('./sort-markers.js');
 
 const coordinateToMinimapBytes = (x) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
@@ -14,16 +15,10 @@ const coordinateToMinimapBytes = (x) => {
 
 const arrayToMinimapMarkerBuffer = (array) => {
 	if (!array.sort) { array = []; }
-	// Sort markers by their `x`, then `y`, then `z`.
-	const sorted = array.sort((a, b) => {
-		return (
-			(a.x * 10000000 + a.y * 100 + a.z) -
-			(b.x * 10000000 + b.y * 100 + b.z)
-		);
-	});
+	sortMarkers(array);
 	// https://tibiamaps.io/guides/minimap-file-format#map-marker-data
 	let result = Buffer.alloc(0);
-	for (const marker of sorted) {
+	for (const marker of array) {
 		const encodedDescription = utf8.encode(marker.description);
 		const encodedDescriptionLength = encodedDescription.length;
 		const markerSize = 20 + encodedDescriptionLength;
