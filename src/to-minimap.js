@@ -95,12 +95,15 @@ const createBinaryMarkers = async () => {
 	return minimapMarkers;
 };
 
-const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overlayGrid) => {
+const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers, overlayGrid) => {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
 	if (!outputPath) {
 		outputPath = 'minimap-new';
+	}
+	if (extra) {
+
 	}
 	GLOBALS.dataDirectory = dataDirectory;
 	GLOBALS.outputPath = outputPath;
