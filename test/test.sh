@@ -40,7 +40,7 @@ compare minimap/minimapmarkers.bin minimap-new/minimapmarkers.bin;
 # Check if `--no-markers` skips importing the marker data.
 tibia-maps --from-minimap=minimap --output-dir=data-without-markers --no-markers;
 files_with_markers="$(find data-without-markers -name 'markers.json' \
-     -type f -size +3c)";
+	-type f -size +3c)";
 if [ "$(tr -d '\n' <<< ${files_with_markers})" != "" ]; then
 	echo 'Error: `--no-markers` extracted marker data anyway!';
 	echo "${files_with_markers}";

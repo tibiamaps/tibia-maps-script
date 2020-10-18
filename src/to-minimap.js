@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const fsp = fs.promises;
+const path = require('path');
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
@@ -13,6 +14,7 @@ const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
+const pngToBuffer = require('./png-to-buffer.js');
 const sortMarkers = require('./sort-markers.js');
 
 const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
@@ -63,8 +65,14 @@ const createBinaryMap = async (floorID) => {
 };
 
 const writeBinaryMapBuffer = (buffer, id) => {
+	const fileName = `Minimap_Color_${id}.png`;
+	const dest = `${GLOBALS.outputPath}/${fileName}`;
+	if (GLOBALS.extraMap.has(fileName)) {
+		const source = GLOBALS.extraMap.get(fileName);
+		buffer = pngToBuffer(source);
+	}
 	GLOBALS.ioPromises.push(writeBuffer(
-		`${GLOBALS.outputPath}/Minimap_Color_${id}.png`,
+		dest,
 		wrapColorData(buffer, { overlayGrid: GLOBALS.overlayGrid })
 	));
 };
@@ -78,8 +86,14 @@ const createBinaryPath = async (floorID) => {
 };
 
 const writeBinaryPathBuffer = (buffer, id) => {
+	const fileName = `Minimap_WaypointCost_${id}.png`;
+	const dest = `${GLOBALS.outputPath}/${fileName}`;
+	if (GLOBALS.extraMap.has(fileName)) {
+		const source = GLOBALS.extraMap.get(fileName);
+		buffer = pngToBuffer(source);
+	}
 	GLOBALS.ioPromises.push(writeBuffer(
-		`${GLOBALS.outputPath}/Minimap_WaypointCost_${id}.png`,
+		dest,
 		wrapWaypointData(buffer)
 	));
 };
@@ -116,6 +130,17 @@ const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers
 	}
 	GLOBALS.dataDirectory = dataDirectory;
 	GLOBALS.extra = extra;
+	GLOBALS.extraMap = (() => {
+		const map = new Map();
+		if (!extra) return map;
+		for (const dir of extra) {
+			const images = fs.readdirSync(dir).filter(file => file.endsWith('.png'));
+			for (const image of images) {
+				map.set(image, path.resolve(dir, image));
+			}
+		}
+		return map;
+	})();
 	GLOBALS.outputPath = outputPath;
 	GLOBALS.overlayGrid = overlayGrid;
 	GLOBALS.ioPromises = [];
