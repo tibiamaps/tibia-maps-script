@@ -92,7 +92,7 @@ const main = async () => {
 				return false;
 			}
 			const ids = argv['extra'].split(',');
-			return ids.map(id => path.resolve(dataDirectory, id));
+			return ids.map(id => path.resolve(dataDirectory, '../extra/', id));
 		})();
 
 		const minimapDirectory = path.resolve(String(argv['output-dir']));

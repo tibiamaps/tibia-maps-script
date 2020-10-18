@@ -13,6 +13,7 @@ const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
+const sortMarkers = require('./sort-markers.js');
 
 const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
 const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
@@ -84,9 +85,20 @@ const writeBinaryPathBuffer = (buffer, id) => {
 };
 
 let MINIMAP_MARKERS = Buffer.alloc(0);
-const createBinaryMarkers = async () => {
-	const json = await fsp.readFile(`${GLOBALS.dataDirectory}/markers.json`, 'utf8');
-	const markers = JSON.parse(json);
+const createBinaryMarkers = async (extra) => {
+	const getMarkers = async (dir) => {
+		const json = await fsp.readFile(`${dir}/markers.json`, 'utf8');
+		const markers = JSON.parse(json);
+		return markers;
+	};
+	const dirs = [
+		GLOBALS.dataDirectory,
+	];
+	if (extra) {
+		dirs.push(...extra);
+	}
+	const parts = await Promise.all(dirs.map(getMarkers));
+	const markers = sortMarkers(parts.flat());
 	const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
 	// TODO: To match the Tibia installer’s import functionality, the markers
 	// are supposed to be ordered by their `x` coordinate value, then by
@@ -102,10 +114,8 @@ const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers
 	if (!outputPath) {
 		outputPath = 'minimap-new';
 	}
-	if (extra) {
-
-	}
 	GLOBALS.dataDirectory = dataDirectory;
+	GLOBALS.extra = extra;
 	GLOBALS.outputPath = outputPath;
 	GLOBALS.overlayGrid = overlayGrid;
 	GLOBALS.ioPromises = [];
@@ -120,7 +130,7 @@ const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers
 			handleParallel(floorIDs, createBinaryPath),
 		];
 		if (includeMarkers) {
-			bufferPromises.push(createBinaryMarkers());
+			bufferPromises.push(createBinaryMarkers(extra));
 		}
 		await Promise.all(bufferPromises);
 		// TODO: We *could* keep track of all the files that have been written, and
