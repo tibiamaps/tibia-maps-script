@@ -39,7 +39,7 @@ compare minimap/minimapmarkers.bin minimap-new/minimapmarkers.bin;
 
 # Check if `--no-markers` skips importing the marker data.
 tibia-maps --from-minimap=minimap --output-dir=data-without-markers --no-markers;
-files_with_markers="$(find data-without-markers -name '*-markers.json' \
+files_with_markers="$(find data-without-markers -name 'markers.json' \
 	-type f -size +3c)";
 if [ "$(tr -d '\n' <<< ${files_with_markers})" != "" ]; then
 	echo 'Error: `--no-markers` extracted marker data anyway!';
@@ -55,3 +55,12 @@ for file in minimap-grid/*.png; do
 	compare "minimap-grid/${f}" "minimap-grid-new/${f}";
 done;
 compare minimap-grid/minimapmarkers.bin minimap-grid-new/minimapmarkers.bin;
+
+# Check if `--extra` works correctly.
+tibia-maps --from-data=data --output-dir=minimap-extra-new --extra=achievements;
+for file in minimap-extra/*.png; do
+	f=$(basename "${file}");
+	[ -f "minimap-extra-new/${f}" ] || echo "Missing file: ${f}";
+	compare "minimap-extra/${f}" "minimap-extra-new/${f}";
+done;
+compare minimap-extra/minimapmarkers.bin minimap-extra-new/minimapmarkers.bin;

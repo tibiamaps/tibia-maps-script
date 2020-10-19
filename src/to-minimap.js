@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const fsp = fs.promises;
+const path = require('path');
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
@@ -13,6 +14,8 @@ const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
 const colors = require('./colors.js');
 const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
 const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
+const pngToBuffer = require('./png-to-buffer.js');
+const sortMarkers = require('./sort-markers.js');
 
 const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
 const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
@@ -62,8 +65,14 @@ const createBinaryMap = async (floorID) => {
 };
 
 const writeBinaryMapBuffer = (buffer, id) => {
+	const fileName = `Minimap_Color_${id}.png`;
+	const dest = `${GLOBALS.outputPath}/${fileName}`;
+	if (GLOBALS.extraMap.has(fileName)) {
+		const source = GLOBALS.extraMap.get(fileName);
+		buffer = pngToBuffer(source);
+	}
 	GLOBALS.ioPromises.push(writeBuffer(
-		`${GLOBALS.outputPath}/Minimap_Color_${id}.png`,
+		dest,
 		wrapColorData(buffer, { overlayGrid: GLOBALS.overlayGrid })
 	));
 };
@@ -77,16 +86,33 @@ const createBinaryPath = async (floorID) => {
 };
 
 const writeBinaryPathBuffer = (buffer, id) => {
+	const fileName = `Minimap_WaypointCost_${id}.png`;
+	const dest = `${GLOBALS.outputPath}/${fileName}`;
+	if (GLOBALS.extraMap.has(fileName)) {
+		const source = GLOBALS.extraMap.get(fileName);
+		buffer = pngToBuffer(source);
+	}
 	GLOBALS.ioPromises.push(writeBuffer(
-		`${GLOBALS.outputPath}/Minimap_WaypointCost_${id}.png`,
+		dest,
 		wrapWaypointData(buffer)
 	));
 };
 
 let MINIMAP_MARKERS = Buffer.alloc(0);
-const createBinaryMarkers = async () => {
-	const json = await fsp.readFile(`${GLOBALS.dataDirectory}/markers.json`, 'utf8');
-	const markers = JSON.parse(json);
+const createBinaryMarkers = async (extra) => {
+	const getMarkers = async (dir) => {
+		const json = await fsp.readFile(`${dir}/markers.json`, 'utf8');
+		const markers = JSON.parse(json);
+		return markers;
+	};
+	const dirs = [
+		GLOBALS.dataDirectory,
+	];
+	if (extra) {
+		dirs.push(...extra);
+	}
+	const parts = await Promise.all(dirs.map(getMarkers));
+	const markers = sortMarkers(parts.flat());
 	const minimapMarkers = arrayToMinimapMarkerBuffer(markers);
 	// TODO: To match the Tibia installer’s import functionality, the markers
 	// are supposed to be ordered by their `x` coordinate value, then by
@@ -95,7 +121,7 @@ const createBinaryMarkers = async () => {
 	return minimapMarkers;
 };
 
-const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overlayGrid) => {
+const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers, overlayGrid) => {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
@@ -103,6 +129,18 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 		outputPath = 'minimap-new';
 	}
 	GLOBALS.dataDirectory = dataDirectory;
+	GLOBALS.extra = extra;
+	GLOBALS.extraMap = (() => {
+		const map = new Map();
+		if (!extra) return map;
+		for (const dir of extra) {
+			const images = fs.readdirSync(dir).filter(file => file.endsWith('.png'));
+			for (const image of images) {
+				map.set(image, path.resolve(dir, image));
+			}
+		}
+		return map;
+	})();
 	GLOBALS.outputPath = outputPath;
 	GLOBALS.overlayGrid = overlayGrid;
 	GLOBALS.ioPromises = [];
@@ -117,7 +155,7 @@ const convertToMinimap = async (dataDirectory, outputPath, includeMarkers, overl
 			handleParallel(floorIDs, createBinaryPath),
 		];
 		if (includeMarkers) {
-			bufferPromises.push(createBinaryMarkers());
+			bufferPromises.push(createBinaryMarkers(extra));
 		}
 		await Promise.all(bufferPromises);
 		// TODO: We *could* keep track of all the files that have been written, and

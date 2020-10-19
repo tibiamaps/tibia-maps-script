@@ -31,9 +31,10 @@ const main = async () => {
 		console.log(`${info.name} v${info.version} - ${info.homepage}`);
 		console.log('\nUsage:\n');
 		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data`);
+		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`);
-		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only`);
+		console.log(`\t${info.name} --from-data=./data --extra=achievements,Orcsoberfest --output-dir=./minimap`);
 		process.exit(1);
 	}
 
@@ -79,14 +80,24 @@ const main = async () => {
 			console.log('`--from-data` path not specified. Using the default, i.e. `data`.');
 			argv['from-data'] = 'data';
 		}
+
 		const dataDirectory = path.resolve(argv['from-data']);
 		if (!argv['output-dir'] || argv['output-dir'] === true) {
 			console.log('`--output-dir` path not specified. Using the default, i.e. `minimap-new`.');
 			argv['output-dir'] = 'minimap-new';
 		}
+
+		const extra = (() => {
+			if (!argv['extra'] || typeof argv['extra'] !== 'string') {
+				return false;
+			}
+			const ids = argv['extra'].split(',');
+			return ids.map(id => path.resolve(dataDirectory, '../extra/', id));
+		})();
+
 		const minimapDirectory = path.resolve(String(argv['output-dir']));
 		await emptyDirectory(minimapDirectory);
-		await convertToMinimap(dataDirectory, minimapDirectory, !excludeMarkers, overlayGrid);
+		await convertToMinimap(dataDirectory, minimapDirectory, extra, !excludeMarkers, overlayGrid);
 		return;
 	}
 };

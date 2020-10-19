@@ -16,6 +16,7 @@ const sortMarkers = (markers) => {
 			(b.z * 1_00000_00000 + b.x * 1_00000 + b.y)
 		);
 	});
+	return markers;
 };
 
 module.exports = sortMarkers;
