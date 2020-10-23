@@ -1,6 +1,7 @@
 data
 test/data
 test/data-without-markers
+test/minimap*-new
 
 # 0x flamecharts
 *.0x

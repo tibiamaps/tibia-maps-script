@@ -64,7 +64,9 @@ const createBinaryMap = async (floorID) => {
 	forEachTile(context, map, pixelDataToMapBuffer, writeBinaryMapBuffer, floorID);
 };
 
+GLOBALS.mapIds = new Set();
 const writeBinaryMapBuffer = (buffer, id) => {
+	GLOBALS.mapIds.add(id);
 	const fileName = `Minimap_Color_${id}.png`;
 	const dest = `${GLOBALS.outputPath}/${fileName}`;
 	if (GLOBALS.extraMap.has(fileName)) {
@@ -85,7 +87,9 @@ const createBinaryPath = async (floorID) => {
 	forEachTile(context, map, pixelDataToPathBuffer, writeBinaryPathBuffer, floorID);
 };
 
+GLOBALS.pathIds = new Set();
 const writeBinaryPathBuffer = (buffer, id) => {
+	GLOBALS.pathIds.add(id);
 	const fileName = `Minimap_WaypointCost_${id}.png`;
 	const dest = `${GLOBALS.outputPath}/${fileName}`;
 	if (GLOBALS.extraMap.has(fileName)) {
@@ -158,10 +162,15 @@ const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers
 			bufferPromises.push(createBinaryMarkers(extra));
 		}
 		await Promise.all(bufferPromises);
-		// TODO: We *could* keep track of all the files that have been written, and
-		// if any `Color` files don’t have a corresponding `WaypointCost` file or
-		// vice versa, we could then create it using `EMPTY_PATH_BUFFER` or
-		// `EMPTY_MAP_BUFFER`. Not sure if this is worth the hassle, though.
+		// Check for `Color` files lacking a corresponding `WaypointCost`
+		// file, and force their creation.
+		// https://github.com/tibiamaps/tibia-map-data/issues/105#issuecomment-714613895
+		const missingWaypointIds = [...GLOBALS.mapIds]
+			.filter(fileName => !GLOBALS.pathIds.has(fileName));
+		for (const id of missingWaypointIds) {
+			console.log('Creating missing `WaypointCost` file:', id);
+			writeBinaryPathBuffer(EMPTY_PATH_BUFFER, id);
+		}
 		if (includeMarkers && MINIMAP_MARKERS.length) {
 			// The Tibia 11 installer doesn’t create the file if no markers are set.
 			GLOBALS.ioPromises.push(writeBuffer(`${outputPath}/minimapmarkers.bin`, MINIMAP_MARKERS));
