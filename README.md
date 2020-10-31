@@ -4,7 +4,7 @@
 
 ## Installation
 
-**Note:** Use the [expected](https://github.com/tibiamaps/tibia-maps-script/blob/master/.nvmrc) Node.js version!
+**Note:** Use the [expected](https://github.com/tibiamaps/tibia-maps-script/blob/main/.nvmrc) Node.js version!
 
 ```sh
 npm install -g tibia-maps
