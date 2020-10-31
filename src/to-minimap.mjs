@@ -1,12 +1,15 @@
-'use strict';
+import { wrapColorData, wrapWaypointData } from 'tibia-minimap-png';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const fs = require('fs');
 const fsp = fs.promises;
+
 const path = require('path');
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
-const { wrapColorData, wrapWaypointData } = require('tibia-minimap-png');
 
 const handleParallel = require('./handle-parallel.js');
 
@@ -125,7 +128,7 @@ const createBinaryMarkers = async (extra) => {
 	return minimapMarkers;
 };
 
-const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers, overlayGrid) => {
+export const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers, overlayGrid) => {
 	if (!dataDirectory) {
 		dataDirectory = 'data';
 	}
@@ -182,5 +185,3 @@ const convertToMinimap = async (dataDirectory, outputPath, extra, includeMarkers
 		reject(exception);
 	}
 };
-
-module.exports = convertToMinimap;

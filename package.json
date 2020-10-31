@@ -3,8 +3,8 @@
 	"version": "5.2.0",
 	"description": "A command-line utility to convert between binary Tibia maps and human-readable forms of the map data.",
 	"homepage": "https://mths.be/tibiamaps",
-	"main": "bin/cli.js",
-	"bin": "bin/cli.js",
+	"main": "bin/cli.mjs",
+	"bin": "bin/cli.mjs",
 	"keywords": [
 		"data",
 		"mmorpg",
@@ -40,7 +40,7 @@
 		"mkdirp": "^1.0.4",
 		"rimraf": "^3.0.2",
 		"tibia-count-walkable-tiles": "^1.2.0",
-		"tibia-minimap-png": "^1.1.0",
+		"tibia-minimap-png": "^2.0.0",
 		"utf8": "^3.0.0",
 		"windows-1252": "^1.0.0"
 	}

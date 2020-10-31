@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
-'use strict';
+import { convertToMinimap } from '../src/to-minimap.mjs';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const path = require('path');
 
@@ -9,7 +12,6 @@ const fsp = require('fs').promises;
 const rimraf = require('rimraf');
 
 const convertFromMinimap = require('../src/from-minimap.js');
-const convertToMinimap = require('../src/to-minimap.js');
 const generateBoundsFromMinimap = require('../src/generate-bounds-from-minimap.js');
 const info = require('../package.json');
 
