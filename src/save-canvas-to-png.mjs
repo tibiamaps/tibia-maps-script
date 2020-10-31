@@ -1,8 +1,6 @@
-'use strict';
+import fs from 'node:fs';
 
-const fs = require('fs');
-
-const saveCanvasToPng = (fileName, canvas) => {
+export const saveCanvasToPng = (fileName, canvas) => {
 	return new Promise((resolve, reject) => {
 		const writeStream = fs.createWriteStream(fileName);
 		const pngStream = canvas.pngStream();
@@ -15,5 +13,3 @@ const saveCanvasToPng = (fileName, canvas) => {
 		});
 	});
 };
-
-module.exports = saveCanvasToPng;

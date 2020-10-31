@@ -1,5 +1,3 @@
-'use strict';
-
 const byByte = new Map([
 	[0x00, { r:   0, g:   0, b:   0 }], // black (empty)
 	[0x0C, { r:   0, g: 102, b:   0 }], // dark green (tree)
@@ -18,23 +16,17 @@ const byByte = new Map([
 	[0xD7, { r: 255, g: 255, b: 255 }], // white (snow)
 ]);
 
-const byColor = new Map();
+export const byColor = new Map();
 for (const [byteValue, color] of byByte) {
 	const colorId = `${color.r},${color.g},${color.b}`;
 	byColor.set(colorId, byteValue);
 }
 
-const unexploredMapByte = 0x00;
-const unexploredPathByte = 0xFA;
-
-module.exports = {
-	'unexploredMapByte': unexploredMapByte,
-	'unexploredMap': byByte.get(unexploredMapByte),
-	// The Tibia 11 client marks unwalkable paths as yellow.
-	'nonWalkablePath': byByte.get(0xD2),
-	'unexploredPath': { r: 0xFA, g: 0xFA, b: 0xFA },
-	// Pink also denotes “unexplored”.
-	'unexploredPathAlternate': { r: 0xFF, g: 0x00, b: 0xFF },
-	'unexploredPathByte': unexploredPathByte,
-	'byColor': byColor,
-};
+export const unexploredMapByte = 0x00;
+export const unexploredMap = byByte.get(unexploredMapByte);
+// The Tibia 11 client marks unwalkable paths as yellow.
+export const nonWalkablePath = byByte.get(0xD2);
+export const unexploredPath = { r: 0xFA, g: 0xFA, b: 0xFA };
+// Pink also denotes “unexplored”.
+export const unexploredPathAlternate = { r: 0xFF, g: 0x00, b: 0xFF };
+export const unexploredPathByte = 0xFA;

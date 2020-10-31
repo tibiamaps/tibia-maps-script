@@ -1,6 +1,4 @@
-'use strict';
-
-const sortMarkers = (markers) => {
+export const sortMarkers = (markers) => {
 	// Sort markers so they start in the top left, then go from top to bottom.
 	// Example:
 	//     · 2 · 4 · · ·
@@ -18,5 +16,3 @@ const sortMarkers = (markers) => {
 	});
 	return markers;
 };
-
-module.exports = sortMarkers;

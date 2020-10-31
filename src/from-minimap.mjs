@@ -1,8 +1,9 @@
-'use strict';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
-const fs = require('fs');
+import fs from 'node:fs';
 const fsp = fs.promises;
-const path = require('path');
+import path from 'node:path';
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
@@ -14,14 +15,14 @@ const resetContext = (context, fillStyle) => {
 	context.fillRect(0, 0, GLOBALS.bounds.width, GLOBALS.bounds.height);
 };
 
-const colors = require('./colors.js');
-const glob = require('./glob-promise.js');
-const handleParallel = require('./handle-parallel.js');
-const iconsById = require('./icons.js').byId;
-const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
-const saveCanvasToPng = require('./save-canvas-to-png.js');
-const sortMarkers = require('./sort-markers.js');
-const writeJson = require('./write-json.js');
+import { unexploredMap, unexploredPath } from './colors.mjs';
+import { glob } from './glob-promise.mjs';
+import { handleParallel } from './handle-parallel.mjs';
+import { iconsById } from './icons.mjs';
+import { minimapIdToAbsoluteXyz } from './minimap-id-to-absolute-xyz.mjs';
+import { saveCanvasToPng } from './save-canvas-to-png.mjs';
+import { sortMarkers } from './sort-markers.mjs';
+import { writeJson } from './write-json.mjs';
 
 const minimapBytesToCoordinate = (x1, x2, x3) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
@@ -146,7 +147,6 @@ const renderFloorMap = async (floorID, floorNumber, mapDirectory, dataDirectory)
 	const bounds = GLOBALS.bounds;
 	const mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const mapContext = mapCanvas.getContext('2d');
-	const unexploredMap = colors.unexploredMap;
 	resetContext(
 		mapContext,
 		`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
@@ -166,7 +166,6 @@ const renderFloorPath = async (floorID, floorNumber, mapDirectory, dataDirectory
 	const bounds = GLOBALS.bounds;
 	const pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const pathContext = pathCanvas.getContext('2d');
-	const unexploredPath = colors.unexploredPath;
 	resetContext(
 		pathContext,
 		`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
@@ -191,7 +190,7 @@ const renderFloor = (floorID, mapDirectory, dataDirectory) => {
 	]);
 };
 
-const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly) => {
+export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly) => {
 	GLOBALS.bounds = bounds;
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';
@@ -215,5 +214,3 @@ const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMa
 		includeMarkers && allMarkers ? allMarkers : []
 	);
 };
-
-module.exports = convertFromMinimap;

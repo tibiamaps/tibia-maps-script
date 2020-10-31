@@ -5,14 +5,15 @@ import { convertToMinimap } from '../src/to-minimap.mjs';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-const path = require('path');
+import path from 'node:path';
 
 const argv = require('argh').argv;
-const fsp = require('fs').promises;
+import fs from 'node:fs';
+const fsp = fs.promises;
 const rimraf = require('rimraf');
 
-const convertFromMinimap = require('../src/from-minimap.js');
-const generateBoundsFromMinimap = require('../src/generate-bounds-from-minimap.js');
+import { convertFromMinimap } from '../src/from-minimap.mjs';
+import { generateBoundsFromMinimap } from '../src/generate-bounds-from-minimap.mjs';
 const info = require('../package.json');
 
 const emptyDirectory = (path) => {

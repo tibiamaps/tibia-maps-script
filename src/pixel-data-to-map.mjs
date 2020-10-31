@@ -1,10 +1,6 @@
-'use strict';
+import { byColor, unexploredMapByte } from './colors.mjs';
 
-const colors = require('./colors.js');
-const byColor = colors.byColor;
-const unexploredMapByte = colors.unexploredMapByte;
-
-const pixelDataToMapBuffer = (pixels) => {
+export const pixelDataToMapBuffer = (pixels) => {
 	const data = pixels.data;
 	// https://tibiamaps.io/guides/map-file-format#visual-map-data
 	let hasData = false;
@@ -34,5 +30,3 @@ const pixelDataToMapBuffer = (pixels) => {
 	}
 	return hasData && buffer;
 };
-
-module.exports = pixelDataToMapBuffer;

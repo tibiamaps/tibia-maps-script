@@ -1,12 +1,11 @@
-'use strict';
+import {
+	nonWalkablePath,
+	unexploredPath,
+	unexploredPathAlternate,
+	unexploredPathByte
+} from './colors.mjs';
 
-const colors = require('./colors.js');
-const nonWalkablePath = colors.nonWalkablePath;
-const unexploredPath = colors.unexploredPath;
-const unexploredPathAlternate = colors.unexploredPathAlternate;
-const unexploredPathByte = colors.unexploredPathByte;
-
-const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
+export const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 	// https://tibiamaps.io/guides/map-file-format#pathfinding-data
 	const data = pixels.data;
 	let hasData = isGroundFloor;
@@ -58,5 +57,3 @@ const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 	}
 	return hasData && buffer;
 };
-
-module.exports = pixelDataToPathBuffer;

@@ -1,4 +1,4 @@
-const byId = new Map([
+export const iconsById = new Map([
 	[0x00, 'checkmark'], // green checkmark ✔
 	[0x01, '?'], // blue question mark ❓
 	[0x02, '!'], // red exclamation mark ❗
@@ -21,12 +21,7 @@ const byId = new Map([
 	[0x13, 'down'], // green arrow down ⬇
 ]);
 
-const byName = new Map();
-for (const [id, name] of byId) {
-	byName.set(name, id);
+export const iconsByName = new Map();
+for (const [id, name] of iconsById) {
+	iconsByName.set(name, id);
 }
-
-module.exports = {
-	byId: byId,
-	byName: byName,
-};

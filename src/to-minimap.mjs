@@ -1,27 +1,27 @@
 import { wrapColorData, wrapWaypointData } from 'tibia-minimap-png';
 
+import { handleParallel } from './handle-parallel.mjs';
+
+import { arrayToMinimapMarkerBuffer } from './array-to-minimap-marker.mjs';
+import { unexploredMapByte, unexploredPathByte } from './colors.mjs';
+import { pixelDataToMapBuffer } from './pixel-data-to-map.mjs';
+import { pixelDataToPathBuffer } from './pixel-data-to-path.mjs';
+import { pngToBuffer } from './png-to-buffer.mjs';
+import { sortMarkers } from './sort-markers.mjs';
+
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-const fs = require('fs');
+import fs from 'node:fs';
 const fsp = fs.promises;
 
-const path = require('path');
+import path from 'node:path';
 
 const Canvas = require('canvas');
 const Image = Canvas.Image;
 
-const handleParallel = require('./handle-parallel.js');
-
-const arrayToMinimapMarkerBuffer = require('./array-to-minimap-marker.js');
-const colors = require('./colors.js');
-const pixelDataToMapBuffer = require('./pixel-data-to-map.js');
-const pixelDataToPathBuffer = require('./pixel-data-to-path.js');
-const pngToBuffer = require('./png-to-buffer.js');
-const sortMarkers = require('./sort-markers.js');
-
-const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, colors.unexploredMapByte);
-const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, colors.unexploredPathByte);
+const EMPTY_MAP_BUFFER = Buffer.alloc(0x10000, unexploredMapByte);
+const EMPTY_PATH_BUFFER = Buffer.alloc(0x10000, unexploredPathByte);
 
 const GLOBALS = {};
 

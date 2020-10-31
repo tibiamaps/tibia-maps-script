@@ -1,13 +1,14 @@
-'use strict';
+import path from 'node:path';
 
-const path = require('path');
+import { glob } from './glob-promise.mjs';
+import { writeJson } from './write-json.mjs';
 
-const glob = require('./glob-promise.js');
-const writeJson = require('./write-json.js');
+import { minimapIdToAbsoluteXyz } from './minimap-id-to-absolute-xyz.mjs';
 
-const minimapIdToAbsoluteXyz = require('./minimap-id-to-absolute-xyz.js');
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
-const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory, writeToDisk) => {
+export const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory, writeToDisk) => {
 	const files = await glob(`${mapsDirectory}/*.png`);
 	const bounds = {
 		xMin: +Infinity,
@@ -53,5 +54,3 @@ const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory, writeToDi
 	}
 	return bounds;
 };
-
-module.exports = generateBoundsFromMinimap;

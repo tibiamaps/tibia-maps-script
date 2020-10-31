@@ -1,9 +1,10 @@
-'use strict';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const utf8 = require('utf8');
 
-const iconsByName = require('./icons.js').byName;
-const sortMarkers = require('./sort-markers.js');
+import { iconsByName } from './icons.mjs';
+import { sortMarkers } from './sort-markers.mjs';
 
 const coordinateToMinimapBytes = (x) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
@@ -13,7 +14,7 @@ const coordinateToMinimapBytes = (x) => {
 	return [ x1, x2, x3 ];
 };
 
-const arrayToMinimapMarkerBuffer = (array) => {
+export const arrayToMinimapMarkerBuffer = (array) => {
 	if (!array.sort) { array = []; }
 	sortMarkers(array);
 	// https://tibiamaps.io/guides/minimap-file-format#map-marker-data
@@ -63,5 +64,3 @@ const arrayToMinimapMarkerBuffer = (array) => {
 	}
 	return result;
 };
-
-module.exports = arrayToMinimapMarkerBuffer;

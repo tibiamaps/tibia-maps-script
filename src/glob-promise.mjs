@@ -1,8 +1,9 @@
-'use strict';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const _glob = require('glob');
 
-const glob = (pattern) => {
+export const glob = (pattern) => {
 	return new Promise((resolve, reject) => {
 		_glob(pattern, (error, files) => {
 			if (error) {
@@ -13,5 +14,3 @@ const glob = (pattern) => {
 		});
 	});
 };
-
-module.exports = glob;
