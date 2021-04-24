@@ -182,6 +182,6 @@ export const convertToMinimap = async (dataDirectory, outputPath, extra, include
 		await Promise.all(GLOBALS.ioPromises);
 	} catch (exception) {
 		console.error(exception.stack);
-		reject(exception);
+		throw exception;
 	}
 };
