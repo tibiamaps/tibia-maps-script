@@ -39,7 +39,7 @@
 		"glob": "^7.1.6",
 		"mkdirp": "^1.0.4",
 		"rimraf": "^3.0.2",
-		"tibia-count-walkable-tiles": "^1.2.0",
+		"tibia-count-walkable-tiles": "^2.0.0",
 		"tibia-minimap-png": "^2.0.0",
 		"utf8": "^3.0.0",
 		"windows-1252": "^1.0.0"
