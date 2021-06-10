@@ -26,7 +26,7 @@ export const unexploredMapByte = 0x00;
 export const unexploredMap = byByte.get(unexploredMapByte);
 // The Tibia 11 client marks unwalkable paths as yellow.
 export const nonWalkablePath = byByte.get(0xD2);
-export const unexploredPath = { r: 0xFA, g: 0xFA, b: 0xFA };
-// Pink also denotes “unexplored”.
-export const unexploredPathAlternate = { r: 0xFF, g: 0x00, b: 0xFF };
-export const unexploredPathByte = 0xFA;
+// Pink denotes “unexplored”.
+export const unexploredPath = { r: 0xFF, g: 0x00, b: 0xFF };
+// https://github.com/tibiamaps/tibia-map-data/issues/158#issuecomment-858848120
+export const unexploredPathByte = 0xFE;

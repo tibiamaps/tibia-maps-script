@@ -1,7 +1,6 @@
 import {
 	nonWalkablePath,
 	unexploredPath,
-	unexploredPathAlternate,
 	unexploredPathByte
 } from './colors.mjs';
 
@@ -29,10 +28,6 @@ export const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 					r === unexploredPath.r &&
 					b === unexploredPath.b &&
 					g === unexploredPath.g
-				) || (
-					r === unexploredPathAlternate.r &&
-					b === unexploredPathAlternate.b &&
-					g === unexploredPathAlternate.g
 				)
 			) {
 				byteValue = unexploredPathByte;
