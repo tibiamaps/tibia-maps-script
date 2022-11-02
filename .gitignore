@@ -1,7 +1,8 @@
 data
 test/data
 test/data-without-markers
-test/minimap*-new
+test/minimap*-new/*
+!test/minimap*-new/.gitkeep
 
 # 0x flamecharts
 *.0x
