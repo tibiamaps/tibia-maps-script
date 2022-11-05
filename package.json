@@ -31,7 +31,7 @@
 		"test": "test"
 	},
 	"scripts": {
-		"test": "test/test.sh"
+		"test": "node test/test.mjs"
 	},
 	"dependencies": {
 		"argh": "^1.0.0",
