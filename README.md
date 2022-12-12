@@ -1,4 +1,4 @@
-# `tibia-maps` CLI [![Build status](https://travis-ci.org/tibiamaps/tibia-maps-script.svg?branch=main)](https://travis-ci.org/tibiamaps/tibia-maps-script)
+# `tibia-maps` CLI [![tibia-maps on npm](https://img.shields.io/npm/v/tibia-maps)](https://www.npmjs.com/package/tibia-maps)
 
 `tibia-maps` is a command-line utility to convert between binary [Tibia](https://www.tibia.com/) maps and [human-readable forms of the map data](https://github.com/tibiamaps/tibia-map-data).
 
