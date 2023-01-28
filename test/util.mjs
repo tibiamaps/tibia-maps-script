@@ -8,7 +8,7 @@ export function compareMarkerFiles(dir, newDir = `${dir}-new`) {
 	const maxIndex = Math.max(markers.length, newMarkers.length);
 
 	for (let i = 0; i < maxIndex; i++) {
-		if (!compareMarkers(markers[i], newMarkers[i])) {
+		if (!isMarkerEqual(markers[i], newMarkers[i])) {
 			const markerJson = JSON.stringify(markers[i], null, 4);
 			const newMarkerJson = JSON.stringify(newMarkers[i], null, 4);
 
@@ -40,7 +40,7 @@ export function readFile(file) {
 	}
 }
 
-function compareMarkers(markerA, markerB) {
+function isMarkerEqual(markerA, markerB) {
 	return markerA != null && markerB != null
 		&& markerA.description === markerB.description
 		&& markerA.icon === markerB.icon
