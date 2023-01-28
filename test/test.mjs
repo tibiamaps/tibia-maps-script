@@ -1,8 +1,9 @@
+import { copyFileSync, fstat } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { dirname } from 'node:path';
 import { chdir } from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { compareDir, readFile } from './util.mjs';
+import { compareDir, compareMarkerFiles, readFile } from './util.mjs';
 
 chdir(dirname(fileURLToPath(import.meta.url)));
 
@@ -32,3 +33,9 @@ const markers = JSON.parse(readFile('data-without-markers/markers.json'));
 if (markers.length > 0) {
 	console.error('Error: `--no-markers` extracted marker data anyway! (data-without-markers/markers.json)');
 }
+
+
+// Check if `--union` works correctly.
+copyFileSync('data-union-base/markers.json', 'data-union-new/markers.json');
+execSync('tibia-maps --union --markers-only --from-minimap=minimap --output-dir=data-union-new');
+compareMarkerFiles('data-union');

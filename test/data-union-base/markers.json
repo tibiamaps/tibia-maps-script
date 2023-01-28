@@ -1,0 +1,16 @@
+[
+	{
+		"description": "Stone Golems",
+		"icon": "red down",
+		"x": 32098,
+		"y": 31371,
+		"z": 8
+	},
+	{
+		"description": "Start",
+		"icon": "star",
+		"x": 33051,
+		"y": 33694,
+		"z": 8
+	}
+]

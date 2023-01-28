@@ -1,6 +1,29 @@
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 
+export function compareMarkerFiles(dir, newDir = `${dir}-new`) {
+	const markers = JSON.parse(readFile(`${dir}/markers.json`));
+	const newMarkers = JSON.parse(readFile(`${newDir}/markers.json`));
+
+	const maxIndex = Math.max(markers.length, newMarkers.length);
+
+	for (let i = 0; i < maxIndex; i++) {
+		if (!compareMarkers(markers[i], newMarkers[i])) {
+			const markerJson = JSON.stringify(markers[i], null, 4);
+			const newMarkerJson = JSON.stringify(newMarkers[i], null, 4);
+
+			console.error(`Marker mismatch at index ${i}:`);
+			console.info(`## EXPECTED (${dir}/markers.json)`);
+			console.info(markerJson);
+			console.info(`## ACTUAL (${newDir}/markers.json)`);
+			console.info(newMarkerJson);
+			return false;
+		}
+	}
+
+	return true;
+}
+
 export function compareDir(dir, newDir = `${dir}-new`, extensions = ['png', 'bin']) {
 	for (const file of readdirSync(dir)) {
 		if (extensions.some(ext => file.endsWith(`.${ext}`))) {
@@ -11,10 +34,19 @@ export function compareDir(dir, newDir = `${dir}-new`, extensions = ['png', 'bin
 
 export function readFile(file) {
 	try {
-		return readFileSync(file);
+		return readFileSync(file).toString();
 	} catch (e) {
 		return null;
 	}
+}
+
+function compareMarkers(markerA, markerB) {
+	return markerA != null && markerB != null
+		&& markerA.description === markerB.description
+		&& markerA.icon === markerB.icon
+		&& markerA.x === markerB.x
+		&& markerA.y === markerB.y
+		&& markerA.z === markerB.z;
 }
 
 function compare(file1, file2) {
