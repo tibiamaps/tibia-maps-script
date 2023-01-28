@@ -71,9 +71,10 @@ const main = async () => {
 		if (!markersOnly) {
 			await emptyDirectory(dataDirectory);
 		}
+		const unionMode = argv['union'];
 		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory, !markersOnly);
 		convertFromMinimap(
-			bounds, mapsDirectory, dataDirectory, !excludeMarkers, markersOnly
+			bounds, mapsDirectory, dataDirectory, !excludeMarkers, markersOnly, unionMode
 		);
 		return;
 	}

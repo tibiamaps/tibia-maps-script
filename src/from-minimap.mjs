@@ -190,7 +190,20 @@ const renderFloor = (floorID, mapDirectory, dataDirectory) => {
 	]);
 };
 
-export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly) => {
+const mergeMarkers = (...markerGroups) => {
+	const markerMap = new Map();
+
+	for (const markerGroup of markerGroups) {
+		for (const marker of markerGroup) {
+			const key = `${marker.x}.${marker.y}.${marker.z}`;
+			markerMap.set(key, marker);
+		}
+	}
+
+	return sortMarkers([...markerMap.values()]);
+};
+
+export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly, unionMode = false) => {
 	GLOBALS.bounds = bounds;
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';
@@ -208,7 +221,16 @@ export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, in
 		return;
 	}
 	const buffer = await fsp.readFile(fileName);
-	const allMarkers = parseMarkerData(buffer);
+	let allMarkers = parseMarkerData(buffer);
+	if (unionMode) {
+		const baseFileName = `${dataDirectory}/markers.json`;
+		if (fs.existsSync(baseFileName)) {
+			const baseJson = await fsp.readFile(baseFileName, 'utf8');
+			const baseMarkers = JSON.parse(baseJson);
+
+			allMarkers = mergeMarkers(baseMarkers, allMarkers);
+		}
+	}
 	writeJson(
 		`${dataDirectory}/markers.json`,
 		includeMarkers && allMarkers ? allMarkers : []
