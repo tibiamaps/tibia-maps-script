@@ -35,6 +35,7 @@ const main = async () => {
 		console.log('\nUsage:\n');
 		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data`);
 		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only`);
+		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only --union`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`);
 		console.log(`\t${info.name} --from-data=./data --extra=achievements,orcsoberfest --output-dir=./minimap`);
