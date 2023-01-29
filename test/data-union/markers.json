@@ -1,0 +1,30 @@
+[
+	{
+		"description": "Foo’s ïñtërnâtiônàlizætiøn workshop",
+		"icon": "star",
+		"x": 32064,
+		"y": 31883,
+		"z": 5
+	},
+	{
+		"description": "Buddel",
+		"icon": "flag",
+		"x": 32021,
+		"y": 31294,
+		"z": 8
+	},
+	{
+		"description": "Stone Golems",
+		"icon": "red down",
+		"x": 32098,
+		"y": 31371,
+		"z": 8
+	},
+	{
+		"description": "Start",
+		"icon": "star",
+		"x": 33051,
+		"y": 33694,
+		"z": 8
+	}
+]
