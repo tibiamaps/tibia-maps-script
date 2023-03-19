@@ -7,7 +7,7 @@
 **Note:** Use the [expected](https://github.com/tibiamaps/tibia-maps-script/blob/main/.nvmrc) Node.js version!
 
 ```sh
-npm install -g github:tibiamaps/tibia-maps-script
+npm install -g tibia-maps
 ```
 
 If you’re on macOS and you get [an error about `xcb-shm`](https://github.com/Automattic/node-canvas/pull/541), try this instead:
