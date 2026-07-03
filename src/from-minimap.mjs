@@ -133,41 +133,18 @@ const drawTileSection = async (context, fileName, prefix, bounds = GLOBALS.bound
 	context.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
-const renderFloorMap = async (floorID, floorNumber, mapDirectory, dataDirectory) => {
-	const bounds = GLOBALS.bounds;
-	const mapCanvas = Canvas.createCanvas(bounds.width, bounds.height);
-	const mapContext = mapCanvas.getContext('2d');
-	resetContext(
-		mapContext,
-		`rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`
-	);
-	// Handle all map files for this floor.
-	const files = await glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`);
+const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirectory, filePattern, prefix, fillStyle, outputName, bounds = GLOBALS.bounds }) => {
+	// Create a canvas for the specified floor layer and render all matching tiles.
+	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
+	const context = canvas.getContext('2d');
+	resetContext(context, fillStyle);
+	const files = await glob(`${mapDirectory}/${filePattern}_*_${floorNumber}.png`);
 	await handleParallel(files, (fileName) => {
-		return drawTileSection(mapContext, fileName, /^Minimap_Color_/, bounds);
+		return drawTileSection(context, fileName, prefix, bounds);
 	});
 	await saveCanvasToPng(
-		`${dataDirectory}/floor-${floorID}-map.png`,
-		mapCanvas
-	);
-};
-
-const renderFloorPath = async (floorID, floorNumber, mapDirectory, dataDirectory) => {
-	const bounds = GLOBALS.bounds;
-	const pathCanvas = Canvas.createCanvas(bounds.width, bounds.height);
-	const pathContext = pathCanvas.getContext('2d');
-	resetContext(
-		pathContext,
-		`rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`
-	);
-	// Handle all path files for this floor.
-	const files = await glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`);
-	await handleParallel(files, (fileName) => {
-		return drawTileSection(pathContext, fileName, /^Minimap_WaypointCost_/, bounds);
-	});
-	await saveCanvasToPng(
-		`${dataDirectory}/floor-${floorID}-path.png`,
-		pathCanvas
+		`${dataDirectory}/${outputName}`,
+		canvas
 	);
 };
 
@@ -175,8 +152,26 @@ const renderFloor = (floorID, mapDirectory, dataDirectory) => {
 	console.log(`Rendering floor ${floorID}…`);
 	const floorNumber = Number(floorID);
 	return Promise.all([
-		renderFloorMap(floorID, floorNumber, mapDirectory, dataDirectory),
-		renderFloorPath(floorID, floorNumber, mapDirectory, dataDirectory),
+		renderFloorLayer({
+			floorID,
+			floorNumber,
+			mapDirectory,
+			dataDirectory,
+			filePattern: 'Minimap_Color',
+			prefix: /^Minimap_Color_/,
+			fillStyle: `rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`,
+			outputName: `floor-${floorID}-map.png`,
+		}),
+		renderFloorLayer({
+			floorID,
+			floorNumber,
+			mapDirectory,
+			dataDirectory,
+			filePattern: 'Minimap_WaypointCost',
+			prefix: /^Minimap_WaypointCost_/,
+			fillStyle: `rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`,
+			outputName: `floor-${floorID}-path.png`,
+		}),
 	]);
 };
 
