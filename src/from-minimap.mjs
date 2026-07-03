@@ -137,9 +137,14 @@ const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirect
 	const context = canvas.getContext('2d');
 	resetContext(context, fillStyle);
 	const files = await glob(`${mapDirectory}/${filePattern}_*_${floorNumber}.png`);
-	await handleParallel(files, (fileName) => {
-		return drawTileSection(context, fileName, prefix, bounds);
-	});
+	const batchSize = 50;
+	// Process tiles in batches to limit concurrent image loading and file reads.
+	for (let i = 0; i < files.length; i += batchSize) {
+		const chunk = files.slice(i, i + batchSize);
+		await handleParallel(chunk, (fileName) => {
+			return drawTileSection(context, fileName, prefix, bounds);
+		});
+	}
 	await saveCanvasToPng(
 		`${dataDirectory}/${outputName}`,
 		canvas
