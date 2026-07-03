@@ -17,10 +17,16 @@ const byByte = new Map([
 ]);
 
 export const byColor = new Map();
+const colorLookup = new Uint8Array(1 << 24).fill(0xFF);
 for (const [byteValue, color] of byByte) {
 	const colorId = `${color.r},${color.g},${color.b}`;
 	byColor.set(colorId, byteValue);
+	colorLookup[(color.r << 16) | (color.g << 8) | color.b] = byteValue;
 }
+
+export const colorToByteValue = (r, g, b) => {
+	return colorLookup[(r << 16) | (g << 8) | b];
+};
 
 export const unexploredMapByte = 0x00;
 export const unexploredMap = byByte.get(unexploredMapByte);
