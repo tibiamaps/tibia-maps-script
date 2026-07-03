@@ -151,31 +151,30 @@ const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirect
 	);
 };
 
-const renderFloor = (floorID, mapDirectory, dataDirectory) => {
+const renderFloor = async (floorID, mapDirectory, dataDirectory) => {
 	console.log(`Rendering floor ${floorID}…`);
 	const floorNumber = Number(floorID);
-	return Promise.all([
-		renderFloorLayer({
-			floorID,
-			floorNumber,
-			mapDirectory,
-			dataDirectory,
-			filePattern: 'Minimap_Color',
-			prefix: /^Minimap_Color_/,
-			fillStyle: `rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`,
-			outputName: `floor-${floorID}-map.png`,
-		}),
-		renderFloorLayer({
-			floorID,
-			floorNumber,
-			mapDirectory,
-			dataDirectory,
-			filePattern: 'Minimap_WaypointCost',
-			prefix: /^Minimap_WaypointCost_/,
-			fillStyle: `rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`,
-			outputName: `floor-${floorID}-path.png`,
-		}),
-	]);
+	// Render floor map and path layers sequentially to minimize peak memory usage.
+	await renderFloorLayer({
+		floorID,
+		floorNumber,
+		mapDirectory,
+		dataDirectory,
+		filePattern: 'Minimap_Color',
+		prefix: /^Minimap_Color_/,
+		fillStyle: `rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`,
+		outputName: `floor-${floorID}-map.png`,
+	});
+	await renderFloorLayer({
+		floorID,
+		floorNumber,
+		mapDirectory,
+		dataDirectory,
+		filePattern: 'Minimap_WaypointCost',
+		prefix: /^Minimap_WaypointCost_/,
+		fillStyle: `rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`,
+		outputName: `floor-${floorID}-path.png`,
+	});
 };
 
 const mergeMarkers = (...markerGroups) => {
@@ -200,9 +199,10 @@ export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, in
 		dataDirectory = 'data';
 	}
 	if (!markersOnly) {
-		await handleParallel(bounds.floorIDs, (floorID) => {
-			return renderFloor(floorID, mapDirectory, dataDirectory);
-		});
+		// Process each floor sequentially so garbage collection can reclaim canvas allocations.
+		for (const floorID of bounds.floorIDs) {
+			await renderFloor(floorID, mapDirectory, dataDirectory);
+		}
 	}
 	const fileName = `${mapDirectory}/minimapmarkers.bin`;
 	if (!fs.existsSync(fileName)) {
