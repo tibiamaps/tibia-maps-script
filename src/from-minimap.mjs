@@ -127,9 +127,7 @@ const drawTileSection = async (context, fileName, prefix, bounds = GLOBALS.bound
 	const coordinates = minimapIdToAbsoluteXyz(id);
 	const xOffset = coordinates.x - bounds.xMin;
 	const yOffset = coordinates.y - bounds.yMin;
-	const buffer = await fsp.readFile(fileName);
-	const image = new Image();
-	image.src = buffer;
+	const image = await Canvas.loadImage(fileName);
 	context.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
