@@ -46,8 +46,5 @@
 		"tibia-minimap-png": "^2.0.0",
 		"utf8": "^3.0.0",
 		"windows-1252": "^1.0.0"
-	},
-	"overrides": {
-		"canvas": "^3.2.3"
 	}
 }

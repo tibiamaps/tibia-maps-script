@@ -69,7 +69,7 @@ function compare(file1, file2) {
 	const hash2 = md5(buffer2);
 
 	if (hash1 !== hash2) {
-		console.error(`MD5 mismatch: ${hash1} vs. ${hash2}`);
+		console.error(`MD5 mismatch for ${file1} vs. ${file2}: ${hash1} vs. ${hash2}`);
 
 		const diffBytes = [];
 		for (let i = 0; i < Math.max(buffer1.length, buffer2.length); i++) {
