@@ -10,6 +10,7 @@ const Image = Canvas.Image;
 const utf8 = require('utf8');
 
 const GLOBALS = {};
+const BATCH_SIZE = 50;
 const resetContext = (context, fillStyle) => {
 	context.fillStyle = fillStyle;
 	context.fillRect(0, 0, GLOBALS.bounds.width, GLOBALS.bounds.height);
@@ -137,10 +138,9 @@ const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirect
 	const context = canvas.getContext('2d');
 	resetContext(context, fillStyle);
 	const files = await glob(`${mapDirectory}/${filePattern}_*_${floorNumber}.png`);
-	const batchSize = 50;
 	// Process tiles in batches to limit concurrent image loading and file reads.
-	for (let i = 0; i < files.length; i += batchSize) {
-		const chunk = files.slice(i, i + batchSize);
+	for (let i = 0; i < files.length; i += BATCH_SIZE) {
+		const chunk = files.slice(i, i + BATCH_SIZE);
 		await handleParallel(chunk, (fileName) => {
 			return drawTileSection(context, fileName, prefix, bounds);
 		});
