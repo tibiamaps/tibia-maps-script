@@ -121,26 +121,16 @@ const parseMarkerData = (buffer) => {
 	return uniqueMarkers;
 };
 
-const drawMapSection = async (mapContext, fileName) => {
-	const id = path.basename(fileName, '.png').replace(/^Minimap_Color_/, '');
+const drawTileSection = async (context, fileName, prefix, bounds = GLOBALS.bounds) => {
+	// Draw a 256x256 map or path section onto the canvas context.
+	const id = path.basename(fileName, '.png').replace(prefix, '');
 	const coordinates = minimapIdToAbsoluteXyz(id);
-	const xOffset = coordinates.x - GLOBALS.bounds.xMin;
-	const yOffset = coordinates.y - GLOBALS.bounds.yMin;
+	const xOffset = coordinates.x - bounds.xMin;
+	const yOffset = coordinates.y - bounds.yMin;
 	const buffer = await fsp.readFile(fileName);
 	const image = new Image();
 	image.src = buffer;
-	mapContext.drawImage(image, xOffset, yOffset, 256, 256);
-};
-
-const drawPathSection = async (pathContext, fileName) => {
-	const id = path.basename(fileName, '.png').replace(/^Minimap_WaypointCost_/, '');
-	const coordinates = minimapIdToAbsoluteXyz(id);
-	const xOffset = coordinates.x - GLOBALS.bounds.xMin;
-	const yOffset = coordinates.y - GLOBALS.bounds.yMin;
-	const buffer = await fsp.readFile(fileName);
-	const image = new Image();
-	image.src = buffer;
-	pathContext.drawImage(image, xOffset, yOffset, 256, 256);
+	context.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
 const renderFloorMap = async (floorID, floorNumber, mapDirectory, dataDirectory) => {
@@ -154,7 +144,7 @@ const renderFloorMap = async (floorID, floorNumber, mapDirectory, dataDirectory)
 	// Handle all map files for this floor.
 	const files = await glob(`${mapDirectory}/Minimap_Color_*_${floorNumber}.png`);
 	await handleParallel(files, (fileName) => {
-		return drawMapSection(mapContext, fileName);
+		return drawTileSection(mapContext, fileName, /^Minimap_Color_/, bounds);
 	});
 	await saveCanvasToPng(
 		`${dataDirectory}/floor-${floorID}-map.png`,
@@ -173,7 +163,7 @@ const renderFloorPath = async (floorID, floorNumber, mapDirectory, dataDirectory
 	// Handle all path files for this floor.
 	const files = await glob(`${mapDirectory}/Minimap_WaypointCost_*_${floorNumber}.png`);
 	await handleParallel(files, (fileName) => {
-		return drawPathSection(pathContext, fileName);
+		return drawTileSection(pathContext, fileName, /^Minimap_WaypointCost_/, bounds);
 	});
 	await saveCanvasToPng(
 		`${dataDirectory}/floor-${floorID}-path.png`,
