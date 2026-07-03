@@ -104,7 +104,7 @@ const parseMarkerData = (buffer) => {
 		// However, there are cases where the client produces a different format
 		// for reasons unknown.
 		// https://github.com/tibiamaps/tibia-maps-script/issues/21
-		while (buffer[index] !== undefined && buffer[index] !== 0x0A) index++;
+		while (index < length && buffer[index] !== 0x0A) index++;
 
 		// Create a sorted-by-key version of the marker object.
 		const sorted = {
