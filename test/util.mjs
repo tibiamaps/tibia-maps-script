@@ -17,6 +17,7 @@ export function compareMarkerFiles(dir, newDir = `${dir}-new`) {
 			console.info(markerJson);
 			console.info(`## ACTUAL (${newDir}/markers.json)`);
 			console.info(newMarkerJson);
+			process.exitCode = 1;
 			return false;
 		}
 	}
@@ -34,7 +35,7 @@ export function compareDir(dir, newDir = `${dir}-new`, extensions = ['png', 'bin
 
 export function readFile(file) {
 	try {
-		return readFileSync(file).toString();
+		return readFileSync(file);
 	} catch (e) {
 		return null;
 	}
@@ -53,12 +54,14 @@ function compare(file1, file2) {
 	const buffer1 = readFile(file1);
 	if (!buffer1) {
 		console.error(`Missing file ${file1}`);
+		process.exitCode = 1;
 		return false;
 	}
 
 	const buffer2 = readFile(file2);
 	if (!buffer2) {
 		console.error(`Missing file ${file2}`);
+		process.exitCode = 1;
 		return false;
 	}
 
@@ -87,6 +90,7 @@ function compare(file1, file2) {
 			console.info(toHex(byteNumber, 8), toHex(byte1), toHex(byte2));
 		}
 
+		process.exitCode = 1;
 		return false;
 	}
 
