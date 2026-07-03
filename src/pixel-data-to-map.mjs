@@ -4,7 +4,7 @@ export const pixelDataToMapBuffer = (pixels) => {
 	const data = pixels.data;
 	// https://tibiamaps.io/guides/map-file-format#visual-map-data
 	let hasData = false;
-	const buffer = Buffer.alloc(0x10000);
+	const buffer = Buffer.allocUnsafe(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
 	while (++xIndex < 256) {
@@ -23,7 +23,7 @@ export const pixelDataToMapBuffer = (pixels) => {
 			if (byteValue === 0xFF) {
 				throw new Error(`Unknown color RGB: ${r},${g},${b}`);
 			}
-			buffer.writeUInt8(byteValue, ++bufferIndex);
+			buffer[++bufferIndex] = byteValue;
 			if (!hasData && byteValue !== unexploredMapByte) {
 				hasData = true;
 			}
