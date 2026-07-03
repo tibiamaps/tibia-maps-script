@@ -32,6 +32,7 @@ execSync('tibia-maps --from-minimap=minimap --output-dir=data-without-markers --
 const markers = JSON.parse(readFile('data-without-markers/markers.json'));
 if (markers.length > 0) {
 	console.error('Error: `--no-markers` extracted marker data anyway! (data-without-markers/markers.json)');
+	process.exitCode = 1;
 }
 
 
