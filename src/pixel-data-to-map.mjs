@@ -1,4 +1,4 @@
-import { byColor, unexploredMapByte } from './colors.mjs';
+import { colorToByteValue, unexploredMapByte } from './colors.mjs';
 
 export const pixelDataToMapBuffer = (pixels) => {
 	const data = pixels.data;
@@ -19,10 +19,9 @@ export const pixelDataToMapBuffer = (pixels) => {
 			// Discard alpha channel data; it’s always 0xFF anyway.
 			//const a = data[offset + 3];
 			// Get the byte value that corresponds to this color.
-			const id = `${r},${g},${b}`;
-			const byteValue = byColor.get(id);
-			if (byteValue == null) {
-				throw new Error(`Unknown color ID: ${id}`);
+			const byteValue = colorToByteValue(r, g, b);
+			if (byteValue === 0xFF) {
+				throw new Error(`Unknown color RGB: ${r},${g},${b}`);
 			}
 			buffer.writeUInt8(byteValue, ++bufferIndex);
 			if (!hasData && byteValue !== unexploredMapByte) {
