@@ -121,9 +121,9 @@ const parseMarkerData = (buffer) => {
 	// Remove duplicate markers.
 	const set = new Set();
 	const uniqueMarkers = markers.filter((marker) => {
-		const serialized = JSON.stringify(marker).toLowerCase();
-		const isDuplicate = set.has(serialized);
-		set.add(serialized);
+		const key = `${marker.x}_${marker.y}_${marker.z}_${marker.icon}_${marker.description.toLowerCase()}`;
+		const isDuplicate = set.has(key);
+		set.add(key);
 		return !isDuplicate;
 	});
 	return uniqueMarkers;
