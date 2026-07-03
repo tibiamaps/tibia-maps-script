@@ -32,17 +32,18 @@ export const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 			) {
 				byteValue = unexploredPathByte;
 			} else {
-				// Verify that `r, `g`, and `b` are either equal or the non-walkable
+				// Verify that `r`, `g`, and `b` are either equal or the non-walkable
 				// color.
-				console.assert(
-					(r === g && r === b) ||
-					(
+				if (
+					!(r === g && r === b) &&
+					!(
 						r === nonWalkablePath.r &&
 						g === nonWalkablePath.g &&
 						b === nonWalkablePath.b
-					),
-					`${r},${g},${b}`
-				);
+					)
+				) {
+					throw new Error(`Invalid path color RGB: ${r},${g},${b}`);
+				}
 				hasData = true;
 				// Get the byte value that corresponds to this color.
 				byteValue = r;
