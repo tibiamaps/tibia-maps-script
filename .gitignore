@@ -11,7 +11,6 @@ test/data*-new/*
 
 # Installed npm modules
 node_modules
-package-lock.json
 
 # Folder view configuration files
 .DS_Store
