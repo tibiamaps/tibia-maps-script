@@ -8,7 +8,7 @@ export const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 	// https://tibiamaps.io/guides/map-file-format#pathfinding-data
 	const data = pixels.data;
 	let hasData = isGroundFloor;
-	const buffer = Buffer.alloc(0x10000);
+	const buffer = Buffer.allocUnsafe(0x10000);
 	let bufferIndex = -1;
 	let xIndex = -1;
 	while (++xIndex < 256) {
@@ -48,7 +48,7 @@ export const pixelDataToPathBuffer = (pixels, isGroundFloor) => {
 				// Get the byte value that corresponds to this color.
 				byteValue = r;
 			}
-			buffer.writeUInt8(byteValue, ++bufferIndex);
+			buffer[++bufferIndex] = byteValue;
 		}
 	}
 	return hasData && buffer;
