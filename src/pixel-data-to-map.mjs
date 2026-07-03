@@ -21,7 +21,9 @@ export const pixelDataToMapBuffer = (pixels) => {
 			// Get the byte value that corresponds to this color.
 			const id = `${r},${g},${b}`;
 			const byteValue = byColor.get(id);
-			console.assert(byteValue != null, `Unknown color ID: ${id}`);
+			if (byteValue == null) {
+				throw new Error(`Unknown color ID: ${id}`);
+			}
 			buffer.writeUInt8(byteValue, ++bufferIndex);
 			if (!hasData && byteValue !== unexploredMapByte) {
 				hasData = true;
