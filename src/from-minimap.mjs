@@ -9,11 +9,11 @@ const Canvas = require('canvas');
 const Image = Canvas.Image;
 const utf8 = require('utf8');
 
-const GLOBALS = {};
 const BATCH_SIZE = 50;
-const resetContext = (context, fillStyle) => {
+const resetContext = (context, fillStyle, bounds) => {
+	// Fill the canvas context with the background unexplored color.
 	context.fillStyle = fillStyle;
-	context.fillRect(0, 0, GLOBALS.bounds.width, GLOBALS.bounds.height);
+	context.fillRect(0, 0, bounds.width, bounds.height);
 };
 
 import { unexploredMap, unexploredPath } from './colors.mjs';
@@ -130,7 +130,7 @@ const parseMarkerData = (buffer) => {
 	return uniqueMarkers;
 };
 
-const drawTileSection = async (context, fileName, prefix, bounds = GLOBALS.bounds) => {
+const drawTileSection = async (context, fileName, prefix, bounds) => {
 	// Draw a 256x256 map or path section onto the canvas context.
 	const id = path.basename(fileName, '.png').replace(prefix, '');
 	const coordinates = minimapIdToAbsoluteXyz(id);
@@ -140,11 +140,11 @@ const drawTileSection = async (context, fileName, prefix, bounds = GLOBALS.bound
 	context.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
-const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirectory, filePattern, prefix, fillStyle, outputName, bounds = GLOBALS.bounds }) => {
+const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirectory, filePattern, prefix, fillStyle, outputName, bounds }) => {
 	// Create a canvas for the specified floor layer and render all matching tiles.
 	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const context = canvas.getContext('2d');
-	resetContext(context, fillStyle);
+	resetContext(context, fillStyle, bounds);
 	const files = await glob(`${mapDirectory}/${filePattern}_*_${floorNumber}.png`);
 	// Process tiles in batches to limit concurrent image loading and file reads.
 	for (let i = 0; i < files.length; i += BATCH_SIZE) {
@@ -159,7 +159,7 @@ const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirect
 	);
 };
 
-const renderFloor = async (floorID, mapDirectory, dataDirectory) => {
+const renderFloor = async (floorID, mapDirectory, dataDirectory, bounds) => {
 	console.log(`Rendering floor ${floorID}…`);
 	const floorNumber = Number(floorID);
 	// Render floor map and path layers sequentially to minimize peak memory usage.
@@ -172,6 +172,7 @@ const renderFloor = async (floorID, mapDirectory, dataDirectory) => {
 		prefix: /^Minimap_Color_/,
 		fillStyle: `rgb(${unexploredMap.r}, ${unexploredMap.g}, ${unexploredMap.b}`,
 		outputName: `floor-${floorID}-map.png`,
+		bounds,
 	});
 	await renderFloorLayer({
 		floorID,
@@ -182,6 +183,7 @@ const renderFloor = async (floorID, mapDirectory, dataDirectory) => {
 		prefix: /^Minimap_WaypointCost_/,
 		fillStyle: `rgb(${unexploredPath.r}, ${unexploredPath.g}, ${unexploredPath.b}`,
 		outputName: `floor-${floorID}-path.png`,
+		bounds,
 	});
 };
 
@@ -199,7 +201,6 @@ const mergeMarkers = (...markerGroups) => {
 };
 
 export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly, unionMode = false) => {
-	GLOBALS.bounds = bounds;
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';
 	}
@@ -209,7 +210,7 @@ export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, in
 	if (!markersOnly) {
 		// Process each floor sequentially so garbage collection can reclaim canvas allocations.
 		for (const floorID of bounds.floorIDs) {
-			await renderFloor(floorID, mapDirectory, dataDirectory);
+			await renderFloor(floorID, mapDirectory, dataDirectory, bounds);
 		}
 	}
 	const fileName = `${mapDirectory}/minimapmarkers.bin`;
