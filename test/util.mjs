@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 
-export function compareMarkerFiles(dir, newDir = `${dir}-new`) {
+export const compareMarkerFiles = (dir, newDir = `${dir}-new`) => {
 	const markers = JSON.parse(readFile(`${dir}/markers.json`));
 	const newMarkers = JSON.parse(readFile(`${newDir}/markers.json`));
 
@@ -23,34 +23,34 @@ export function compareMarkerFiles(dir, newDir = `${dir}-new`) {
 	}
 
 	return true;
-}
+};
 
-export function compareDir(dir, newDir = `${dir}-new`, extensions = ['png', 'bin']) {
+export const compareDir = (dir, newDir = `${dir}-new`, extensions = ['png', 'bin']) => {
 	for (const file of readdirSync(dir)) {
 		if (extensions.some(ext => file.endsWith(`.${ext}`))) {
 			compare(`${dir}/${file}`, `${newDir}/${file}`);
 		}
 	}
-}
+};
 
-export function readFile(file) {
+export const readFile = (file) => {
 	try {
 		return readFileSync(file);
 	} catch (e) {
 		return null;
 	}
-}
+};
 
-function isMarkerEqual(markerA, markerB) {
+const isMarkerEqual = (markerA, markerB) => {
 	return markerA != null && markerB != null
 		&& markerA.description === markerB.description
 		&& markerA.icon === markerB.icon
 		&& markerA.x === markerB.x
 		&& markerA.y === markerB.y
 		&& markerA.z === markerB.z;
-}
+};
 
-function compare(file1, file2) {
+const compare = (file1, file2) => {
 	const buffer1 = readFile(file1);
 	if (!buffer1) {
 		console.error(`Missing file ${file1}`);
@@ -95,16 +95,16 @@ function compare(file1, file2) {
 	}
 
 	return true;
-}
+};
 
-function md5(buffer) {
+const md5 = (buffer) => {
 	return createHash('md5')
 		.update(buffer)
 		.digest('hex');
-}
+};
 
-function toHex(byte, padding = 2) {
+const toHex = (byte, padding = 2) => {
 	return byte?.toString(16)
 		.padStart(padding, '0')
 		.toUpperCase() ?? '--';
-}
+};

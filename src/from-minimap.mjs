@@ -6,7 +6,6 @@ const fsp = fs.promises;
 import path from 'node:path';
 
 const Canvas = require('canvas');
-const Image = Canvas.Image;
 const utf8 = require('utf8');
 
 const BATCH_SIZE = 50;
@@ -22,8 +21,8 @@ import { handleParallel } from './handle-parallel.mjs';
 import { iconsById } from './icons.mjs';
 import { minimapIdToAbsoluteXyz } from './minimap-id-to-absolute-xyz.mjs';
 import { saveCanvasToPng } from './save-canvas-to-png.mjs';
+import { serializeMarkers } from './serialize-markers.mjs';
 import { sortMarkers } from './sort-markers.mjs';
-import { writeJson } from './write-json.mjs';
 
 const minimapBytesToCoordinate = (x1, x2, x3) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
@@ -33,8 +32,13 @@ const minimapBytesToCoordinate = (x1, x2, x3) => {
 const assertByte = (actual, expected, description) => {
 	// Throw a descriptive error if the actual byte does not match the expected value.
 	if (actual !== expected) {
-		const actualHex = actual === undefined ? 'undefined' : `0x${actual.toString(16).padStart(2, '0')}`;
-		throw new Error(`Unexpected ${description}: expected 0x${expected.toString(16).padStart(2, '0')}, got ${actualHex}.`);
+		const actualHex =
+			actual === undefined
+				? 'undefined'
+				: `0x${actual.toString(16).padStart(2, '0')}`;
+		throw new Error(
+			`Unexpected ${description}: expected 0x${expected.toString(16).padStart(2, '0')}, got ${actualHex}.`,
+		);
 	}
 };
 
@@ -54,18 +58,18 @@ const parseMarkerData = (buffer) => {
 		const marker = {};
 
 		// The first byte is 0x0A.
-		assertByte(buffer[index++], 0x0A, 'marker start delimiter');
+		assertByte(buffer[index++], 0x0a, 'marker start delimiter');
 		// The second byte indicates the size of this marker’s data block (i.e. all
 		// the following bytes).
 		const markerSize = buffer.readUInt8(index++, 1);
 		// The following byte is another 0x0A separator, indicating the start of the
 		// coordinate data block.
-		assertByte(buffer[index++], 0x0A, 'coordinate block separator');
+		assertByte(buffer[index++], 0x0a, 'coordinate block separator');
 		// The next byte indicates the size of this marker’s coordinate data block.
 		const coordinateSize = buffer.readUInt8(index++, 1);
 		// For simplicity, we only support the coordinate sizes used on the official
 		// servers. For those, `coordinateSize` is always 0x0A.
-		assertByte(coordinateSize, 0x0A, 'coordinate block size');
+		assertByte(coordinateSize, 0x0a, 'coordinate block size');
 		// The 0x08 byte marks the start of the `x` coordinate data.
 		assertByte(buffer[index++], 0x08, 'x coordinate start byte');
 		// The next 1, 2, or 3 bytes represent the `x` coordinate.
@@ -90,29 +94,27 @@ const parseMarkerData = (buffer) => {
 		const imageID = buffer.readUInt8(index++, 1);
 		marker.icon = iconsById.get(imageID);
 		// The next byte is 0x1A.
-		assertByte(buffer[index++], 0x1A, 'description start byte');
+		assertByte(buffer[index++], 0x1a, 'description start byte');
 		// The next byte indicates the size of the string that follows.
 		const descriptionLength = buffer.readUInt8(index++, 1);
 		// The following bytes represent the marker description as a UTF-8–encoded
 		// string.
 		const descriptionBuffer = buffer.slice(index, index + descriptionLength);
 		index += descriptionLength;
-		marker.description = utf8.decode(
-			descriptionBuffer.toString('binary')
-		);
+		marker.description = utf8.decode(descriptionBuffer.toString('binary'));
 		// The next few bytes are usually 0x20 0x00, marking the end of the marker.
 		// However, there are cases where the client produces a different format
 		// for reasons unknown.
 		// https://github.com/tibiamaps/tibia-maps-script/issues/21
-		while (index < length && buffer[index] !== 0x0A) index++;
+		while (index < length && buffer[index] !== 0x0a) index++;
 
 		// Create a sorted-by-key version of the marker object.
 		const sorted = {
-			description: marker.description,
-			icon: marker.icon,
 			x: marker.x,
 			y: marker.y,
 			z: marker.z,
+			icon: marker.icon,
+			description: marker.description,
 		};
 		markers.push(sorted);
 	}
@@ -140,12 +142,24 @@ const drawTileSection = async (context, fileName, prefix, bounds) => {
 	context.drawImage(image, xOffset, yOffset, 256, 256);
 };
 
-const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirectory, filePattern, prefix, fillStyle, outputName, bounds }) => {
+const renderFloorLayer = async ({
+	floorID,
+	floorNumber,
+	mapDirectory,
+	dataDirectory,
+	filePattern,
+	prefix,
+	fillStyle,
+	outputName,
+	bounds,
+}) => {
 	// Create a canvas for the specified floor layer and render all matching tiles.
 	const canvas = Canvas.createCanvas(bounds.width, bounds.height);
 	const context = canvas.getContext('2d');
 	resetContext(context, fillStyle, bounds);
-	const files = await glob(`${mapDirectory}/${filePattern}_*_${floorNumber}.png`);
+	const files = await glob(
+		`${mapDirectory}/${filePattern}_*_${floorNumber}.png`,
+	);
 	// Process tiles in batches to limit concurrent image loading and file reads.
 	for (let i = 0; i < files.length; i += BATCH_SIZE) {
 		const chunk = files.slice(i, i + BATCH_SIZE);
@@ -153,10 +167,7 @@ const renderFloorLayer = async ({ floorID, floorNumber, mapDirectory, dataDirect
 			return drawTileSection(context, fileName, prefix, bounds);
 		});
 	}
-	await saveCanvasToPng(
-		`${dataDirectory}/${outputName}`,
-		canvas
-	);
+	await saveCanvasToPng(`${dataDirectory}/${outputName}`, canvas);
 };
 
 const renderFloor = async (floorID, mapDirectory, dataDirectory, bounds) => {
@@ -200,7 +211,14 @@ const mergeMarkers = (...markerGroups) => {
 	return sortMarkers([...markerMap.values()]);
 };
 
-export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, includeMarkers, markersOnly, unionMode = false) => {
+export const convertFromMinimap = async (
+	bounds,
+	mapDirectory,
+	dataDirectory,
+	includeMarkers,
+	markersOnly,
+	unionMode = false,
+) => {
 	if (!mapDirectory) {
 		mapDirectory = 'minimap';
 	}
@@ -228,8 +246,8 @@ export const convertFromMinimap = async (bounds, mapDirectory, dataDirectory, in
 			allMarkers = mergeMarkers(baseMarkers, allMarkers);
 		}
 	}
-	writeJson(
-		`${dataDirectory}/markers.json`,
-		includeMarkers && allMarkers ? allMarkers : []
+	const formattedJson = serializeMarkers(
+		includeMarkers && allMarkers ? allMarkers : [],
 	);
+	await fsp.writeFile(`${dataDirectory}/markers.json`, formattedJson);
 };
