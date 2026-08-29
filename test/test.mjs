@@ -30,8 +30,11 @@ if (serializedSample !== expectedSample) {
 	process.exitCode = 1;
 }
 
-execSync('npm link');
-execSync('tibia-maps --from-minimap=minimap --output-dir=data');
+const runCli = (args) => {
+	execSync(`node ../bin/cli.mjs ${args}`);
+};
+
+runCli('--from-minimap=minimap --output-dir=data');
 
 // Check if the generated `markers.json` matches the expected format.
 const actualMarkersContent = readFile('data/markers.json').toString('utf8');
@@ -44,22 +47,22 @@ if (actualMarkersContent !== expectedMarkersContent) {
 
 // Check if the generated map files based on the generated PNG and JSON data
 // match the original map files, and call out any differences.
-execSync('tibia-maps --from-data=data --output-dir=minimap-new');
+runCli('--from-data=data --output-dir=minimap-new');
 compareDir('minimap');
 
 
 // Check if `--overlay-grid` works correctly.
-execSync('tibia-maps --from-data=data --output-dir=minimap-grid-new --overlay-grid');
+runCli('--from-data=data --output-dir=minimap-grid-new --overlay-grid');
 compareDir('minimap-grid');
 
 
 // Check if `--extra` works correctly.
-execSync('tibia-maps --from-data=data --output-dir=minimap-extra-new --extra=achievements');
+runCli('--from-data=data --output-dir=minimap-extra-new --extra=achievements');
 compareDir('minimap-extra');
 
 
 // Check if `--no-markers` skips importing the marker data.
-execSync('tibia-maps --from-minimap=minimap --output-dir=data-without-markers --no-markers');
+runCli('--from-minimap=minimap --output-dir=data-without-markers --no-markers');
 const markers = JSON.parse(readFile('data-without-markers/markers.json'));
 if (markers.length > 0) {
 	console.error('Error: `--no-markers` extracted marker data anyway! (data-without-markers/markers.json)');
@@ -74,7 +77,7 @@ if (emptyMarkersContent !== '[]\n') {
 
 // Check if `--union` works correctly.
 await fs.copyFile('data-union-base/markers.json', 'data-union-new/markers.json');
-execSync('tibia-maps --union --markers-only --from-minimap=minimap --output-dir=data-union-new');
+runCli('--union --markers-only --from-minimap=minimap --output-dir=data-union-new');
 compareMarkerFiles('data-union');
 const actualUnionMarkersContent = readFile('data-union-new/markers.json').toString('utf8');
 const expectedUnionMarkersContent = readFile('data-union/markers.json').toString('utf8');
@@ -103,7 +106,7 @@ await fs.unlink('data/markers-sort-test.json');
 
 // Check if `--sort-markers` CLI flag works correctly.
 await fs.writeFile('data/markers-sort-test.json', JSON.stringify(unsortedMarkers));
-execSync('tibia-maps --sort-markers=data/markers-sort-test.json');
+runCli('--sort-markers=data/markers-sort-test.json');
 const actualCliSortedContent = (await fs.readFile('data/markers-sort-test.json')).toString('utf8');
 if (actualCliSortedContent !== expectedMarkersContent) {
 	console.error('Error: `tibia-maps --sort-markers` output does not match expected format!');
@@ -115,7 +118,7 @@ await fs.unlink('data/markers-sort-test.json');
 // Check if `--sort-markers` CLI flag works with a directory path.
 await fs.mkdir('data-sort-dir-test', { recursive: true });
 await fs.writeFile('data-sort-dir-test/markers.json', JSON.stringify(unsortedMarkers));
-execSync('tibia-maps --sort-markers=data-sort-dir-test');
+runCli('--sort-markers=data-sort-dir-test');
 const actualDirSortedContent = (await fs.readFile('data-sort-dir-test/markers.json')).toString('utf8');
 if (actualDirSortedContent !== expectedMarkersContent) {
 	console.error('Error: `tibia-maps --sort-markers` with directory argument output does not match expected format!');
