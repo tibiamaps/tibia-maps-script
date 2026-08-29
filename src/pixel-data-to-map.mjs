@@ -20,7 +20,7 @@ export const pixelDataToMapBuffer = (pixels) => {
 			//const a = data[offset + 3];
 			// Get the byte value that corresponds to this color.
 			const byteValue = colorToByteValue(r, g, b);
-			if (byteValue === 0xFF) {
+			if (byteValue === 0xff) {
 				throw new Error(`Unknown color RGB: ${r},${g},${b}`);
 			}
 			buffer[++bufferIndex] = byteValue;

@@ -8,7 +8,11 @@ import { minimapIdToAbsoluteXyz } from './minimap-id-to-absolute-xyz.mjs';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-export const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory, writeToDisk) => {
+export const generateBoundsFromMinimap = async (
+	mapsDirectory,
+	dataDirectory,
+	writeToDisk,
+) => {
 	const files = await glob(`${mapsDirectory}/*.png`);
 	const bounds = {
 		xMin: +Infinity,
@@ -20,7 +24,9 @@ export const generateBoundsFromMinimap = async (mapsDirectory, dataDirectory, wr
 	};
 	const floorIDs = [];
 	for (const file of files) {
-		const id = path.basename(file, '.png').replace(/^Minimap_(?:Color|WaypointCost)_/, '');
+		const id = path
+			.basename(file, '.png')
+			.replace(/^Minimap_(?:Color|WaypointCost)_/, '');
 		const coordinates = minimapIdToAbsoluteXyz(id);
 		const { x, y, z } = coordinates;
 		if (bounds.xMin > x) {
