@@ -34,11 +34,21 @@ const main = async () => {
 		console.log(`${info.name} v${info.version} - ${info.homepage}`);
 		console.log('\nUsage:\n');
 		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data`);
-		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only`);
-		console.log(`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only --union`);
-		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`);
-		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`);
-		console.log(`\t${info.name} --from-data=./data --extra=achievements,orcsoberfest --output-dir=./minimap`);
+		console.log(
+			`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only`,
+		);
+		console.log(
+			`\t${info.name} --from-minimap=./minimap --output-dir=./data --markers-only --union`,
+		);
+		console.log(
+			`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`,
+		);
+		console.log(
+			`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`,
+		);
+		console.log(
+			`\t${info.name} --from-data=./data --extra=achievements,orcsoberfest --output-dir=./minimap`,
+		);
 		console.log(`\t${info.name} --sort-markers=./data/markers.json`);
 		process.exit(1);
 	}
@@ -55,18 +65,24 @@ const main = async () => {
 	].filter(Boolean);
 
 	if (modes.length === 0) {
-		console.log('Missing `--from-minimap`, `--from-data`, or `--sort-markers` flag.');
+		console.log(
+			'Missing `--from-minimap`, `--from-data`, or `--sort-markers` flag.',
+		);
 		return process.exit(1);
 	}
 
 	if (modes.length > 1) {
-		console.log(`Cannot combine \`${modes[0]}\` with \`${modes[1]}\`. Pick one.`);
+		console.log(
+			`Cannot combine \`${modes[0]}\` with \`${modes[1]}\`. Pick one.`,
+		);
 		return process.exit(1);
 	}
 
 	if (argv['sort-markers']) {
 		if (argv['sort-markers'] === true) {
-			console.log('`--sort-markers` path not specified. Using the default, i.e. `data/markers.json`.');
+			console.log(
+				'`--sort-markers` path not specified. Using the default, i.e. `data/markers.json`.',
+			);
 			argv['sort-markers'] = 'data/markers.json';
 		}
 		const files = Array.isArray(argv['sort-markers'])
@@ -81,12 +97,16 @@ const main = async () => {
 
 	if (argv['from-minimap']) {
 		if (argv['from-minimap'] === true) {
-			console.log('`--from-minimap` path not specified. Using the default, i.e. `minimap`.');
+			console.log(
+				'`--from-minimap` path not specified. Using the default, i.e. `minimap`.',
+			);
 			argv['from-minimap'] = 'minimap';
 		}
 		const mapsDirectory = path.resolve(String(argv['from-minimap']));
 		if (!argv['output-dir'] || argv['output-dir'] === true) {
-			console.log('`--output-dir` path not specified. Using the default, i.e. `data`.');
+			console.log(
+				'`--output-dir` path not specified. Using the default, i.e. `data`.',
+			);
 			argv['output-dir'] = 'data';
 		}
 		const dataDirectory = path.resolve(String(argv['output-dir']));
@@ -95,22 +115,35 @@ const main = async () => {
 			await emptyDirectory(dataDirectory);
 		}
 		const unionMode = argv['union'];
-		const bounds = await generateBoundsFromMinimap(mapsDirectory, dataDirectory, !markersOnly);
+		const bounds = await generateBoundsFromMinimap(
+			mapsDirectory,
+			dataDirectory,
+			!markersOnly,
+		);
 		await convertFromMinimap(
-			bounds, mapsDirectory, dataDirectory, !excludeMarkers, markersOnly, unionMode
+			bounds,
+			mapsDirectory,
+			dataDirectory,
+			!excludeMarkers,
+			markersOnly,
+			unionMode,
 		);
 		return;
 	}
 
 	if (argv['from-data']) {
 		if (argv['from-data'] === true) {
-			console.log('`--from-data` path not specified. Using the default, i.e. `data`.');
+			console.log(
+				'`--from-data` path not specified. Using the default, i.e. `data`.',
+			);
 			argv['from-data'] = 'data';
 		}
 
 		const dataDirectory = path.resolve(argv['from-data']);
 		if (!argv['output-dir'] || argv['output-dir'] === true) {
-			console.log('`--output-dir` path not specified. Using the default, i.e. `minimap-new`.');
+			console.log(
+				'`--output-dir` path not specified. Using the default, i.e. `minimap-new`.',
+			);
 			argv['output-dir'] = 'minimap-new';
 		}
 
@@ -119,12 +152,18 @@ const main = async () => {
 				return false;
 			}
 			const ids = argv['extra'].split(',');
-			return ids.map(id => path.resolve(dataDirectory, '../extra/', id));
+			return ids.map((id) => path.resolve(dataDirectory, '../extra/', id));
 		})();
 
 		const minimapDirectory = path.resolve(String(argv['output-dir']));
 		await emptyDirectory(minimapDirectory);
-		await convertToMinimap(dataDirectory, minimapDirectory, extra, !excludeMarkers, overlayGrid);
+		await convertToMinimap(
+			dataDirectory,
+			minimapDirectory,
+			extra,
+			!excludeMarkers,
+			overlayGrid,
+		);
 		return;
 	}
 };

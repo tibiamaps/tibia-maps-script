@@ -31,7 +31,8 @@
 		"test": "test"
 	},
 	"scripts": {
-		"test": "node test/test.mjs"
+		"test": "node test/test.mjs",
+		"format": "prettier . --write"
 	},
 	"engines": {
 		"node": ">=26.0.0"
@@ -46,5 +47,8 @@
 		"tibia-minimap-png": "^2.1.1",
 		"utf8": "^3.0.0",
 		"windows-1252": "^1.0.0"
+	},
+	"devDependencies": {
+		"prettier": "^3.9.6"
 	}
 }

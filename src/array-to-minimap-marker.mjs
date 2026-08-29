@@ -9,13 +9,15 @@ import { sortMarkers } from './sort-markers.mjs';
 const coordinateToMinimapBytes = (x) => {
 	// https://tibiamaps.io/guides/minimap-file-format#coordinates
 	const x3 = x >> 14;
-	const x1 = 0x80 + x % 0x80;
+	const x1 = 0x80 + (x % 0x80);
 	const x2 = (x - 0x4000 * x3 - x1 + 0x4080) >> 7;
-	return [ x1, x2, x3 ];
+	return [x1, x2, x3];
 };
 
 export const arrayToMinimapMarkerBuffer = (array) => {
-	if (!array.sort) { array = []; }
+	if (!array.sort) {
+		array = [];
+	}
 	sortMarkers(array);
 	// https://tibiamaps.io/guides/minimap-file-format#map-marker-data
 	let result = Buffer.alloc(0);
@@ -26,17 +28,17 @@ export const arrayToMinimapMarkerBuffer = (array) => {
 		// Assume x1, x2, x3 and y1, y2, y3 are all needed.
 		const coordinateSize = 10;
 		const markerBuffer = Buffer.alloc(markerSize);
-		markerBuffer.writeUInt8(0x0A, 0);
+		markerBuffer.writeUInt8(0x0a, 0);
 		markerBuffer.writeUInt8(markerSize - 2, 1);
-		markerBuffer.writeUInt8(0x0A, 2);
+		markerBuffer.writeUInt8(0x0a, 2);
 		markerBuffer.writeUInt8(coordinateSize, 3);
 		markerBuffer.writeUInt8(0x08, 4);
-		const [ x1, x2, x3 ] = coordinateToMinimapBytes(marker.x);
+		const [x1, x2, x3] = coordinateToMinimapBytes(marker.x);
 		markerBuffer.writeUInt8(x1, 5);
 		markerBuffer.writeUInt8(x2, 6);
 		markerBuffer.writeUInt8(x3, 7);
 		markerBuffer.writeUInt8(0x10, 8);
-		const [ y1, y2, y3 ] = coordinateToMinimapBytes(marker.y);
+		const [y1, y2, y3] = coordinateToMinimapBytes(marker.y);
 		markerBuffer.writeUInt8(y1, 9);
 		markerBuffer.writeUInt8(y2, 10);
 		markerBuffer.writeUInt8(y3, 11);
@@ -46,17 +48,17 @@ export const arrayToMinimapMarkerBuffer = (array) => {
 		const iconByte = iconsByName.get(marker.icon);
 		console.assert(iconByte != null);
 		markerBuffer.writeUInt8(iconByte, 15);
-		markerBuffer.writeUInt8(0x1A, 16);
+		markerBuffer.writeUInt8(0x1a, 16);
 		markerBuffer.writeUInt8(encodedDescriptionLength, 17);
 		console.assert(
 			marker.description.length <= 100,
-			'Marker description should be 100 symbols or fewer for the minimap format'
+			'Marker description should be 100 symbols or fewer for the minimap format',
 		);
 		markerBuffer.write(
 			encodedDescription,
 			18,
 			encodedDescriptionLength,
-			'binary'
+			'binary',
 		);
 		markerBuffer.writeUInt8(0x20, 18 + encodedDescriptionLength);
 		markerBuffer.writeUInt8(0x00, 19 + encodedDescriptionLength);
