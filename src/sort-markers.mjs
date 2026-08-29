@@ -14,7 +14,9 @@ export const sortMarkers = (markers) => {
 		//     01_00000_00000
 		// and then just compare the numbers.
 		return (
-			(a.z * 1_00000_00000 + a.x * 1_00000 + a.y) -
+			a.z * 1_00000_00000 +
+			a.x * 1_00000 +
+			a.y -
 			(b.z * 1_00000_00000 + b.x * 1_00000 + b.y)
 		);
 	});
@@ -54,4 +56,3 @@ export const sortMarkersInFile = async (filePath) => {
 	const serialized = serializeMarkers(deduped);
 	await fs.writeFile(targetPath, serialized);
 };
-

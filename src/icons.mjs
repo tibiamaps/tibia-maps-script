@@ -9,12 +9,12 @@ export const iconsById = new Map([
 	[0x07, 'spear'], // spear 🏹
 	[0x08, 'sword'], // sword ⚔
 	[0x09, 'flag'], // blue flag ⚑
-	[0x0A, 'lock'], // golden lock 🔒
-	[0x0B, 'bag'], // brown bag 👛
-	[0x0C, 'skull'], // skull 💀
-	[0x0D, '$'], // green dollar sign 💰💲
-	[0x0E, 'red up'], // red arrow up ⬆️🔺
-	[0x0F, 'red down'], // red arrow down ⬇🔻
+	[0x0a, 'lock'], // golden lock 🔒
+	[0x0b, 'bag'], // brown bag 👛
+	[0x0c, 'skull'], // skull 💀
+	[0x0d, '$'], // green dollar sign 💰💲
+	[0x0e, 'red up'], // red arrow up ⬆️🔺
+	[0x0f, 'red down'], // red arrow down ⬇🔻
 	[0x10, 'red right'], // red arrow right ➡️
 	[0x11, 'red left'], // red arrow left ⬅️
 	[0x12, 'up'], // green arrow up ⬆

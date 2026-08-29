@@ -25,9 +25,13 @@ export const compareMarkerFiles = (dir, newDir = `${dir}-new`) => {
 	return true;
 };
 
-export const compareDir = (dir, newDir = `${dir}-new`, extensions = ['png', 'bin']) => {
+export const compareDir = (
+	dir,
+	newDir = `${dir}-new`,
+	extensions = ['png', 'bin'],
+) => {
 	for (const file of readdirSync(dir)) {
-		if (extensions.some(ext => file.endsWith(`.${ext}`))) {
+		if (extensions.some((ext) => file.endsWith(`.${ext}`))) {
 			compare(`${dir}/${file}`, `${newDir}/${file}`);
 		}
 	}
@@ -42,12 +46,15 @@ export const readFile = (file) => {
 };
 
 const isMarkerEqual = (markerA, markerB) => {
-	return markerA != null && markerB != null
-		&& markerA.description === markerB.description
-		&& markerA.icon === markerB.icon
-		&& markerA.x === markerB.x
-		&& markerA.y === markerB.y
-		&& markerA.z === markerB.z;
+	return (
+		markerA != null &&
+		markerB != null &&
+		markerA.description === markerB.description &&
+		markerA.icon === markerB.icon &&
+		markerA.x === markerB.x &&
+		markerA.y === markerB.y &&
+		markerA.z === markerB.z
+	);
 };
 
 const compare = (file1, file2) => {
@@ -69,7 +76,9 @@ const compare = (file1, file2) => {
 	const hash2 = md5(buffer2);
 
 	if (hash1 !== hash2) {
-		console.error(`MD5 mismatch for ${file1} vs. ${file2}: ${hash1} vs. ${hash2}`);
+		console.error(
+			`MD5 mismatch for ${file1} vs. ${file2}: ${hash1} vs. ${hash2}`,
+		);
 
 		const diffBytes = [];
 		for (let i = 0; i < Math.max(buffer1.length, buffer2.length); i++) {
@@ -98,13 +107,9 @@ const compare = (file1, file2) => {
 };
 
 const md5 = (buffer) => {
-	return createHash('md5')
-		.update(buffer)
-		.digest('hex');
+	return createHash('md5').update(buffer).digest('hex');
 };
 
 const toHex = (byte, padding = 2) => {
-	return byte?.toString(16)
-		.padStart(padding, '0')
-		.toUpperCase() ?? '--';
+	return byte?.toString(16).padStart(padding, '0').toUpperCase() ?? '--';
 };
