@@ -38,6 +38,14 @@ tibia-maps --from-data=./data --output-dir=./minimap-new
 
 The output is saved in the `minimap-new` directory.
 
+### Sort marker data
+
+To sort and deduplicate marker data in a JSON file in-place, run:
+
+```sh
+tibia-maps --sort-markers=./data/markers.json
+```
+
 ## Author
 
 | [![twitter/mathias](https://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter") |

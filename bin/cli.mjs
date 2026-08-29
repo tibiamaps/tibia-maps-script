@@ -8,20 +8,20 @@ const require = createRequire(import.meta.url);
 import path from 'node:path';
 
 const argv = require('argh').argv;
-import fs from 'node:fs';
-const fsp = fs.promises;
+import fs from 'node:fs/promises';
+const fsp = fs;
 const rimraf = require('rimraf');
 
 import { convertFromMinimap } from '../src/from-minimap.mjs';
 import { generateBoundsFromMinimap } from '../src/generate-bounds-from-minimap.mjs';
+import { sortMarkersInFile } from '../src/sort-markers.mjs';
 const info = require('../package.json');
 
 const emptyDirectory = (path) => {
 	return new Promise((resolve, reject) => {
-		rimraf(`${path}/*`, () => {
-			fsp.mkdir(path, { recursive: true }).then(() => {
-				resolve();
-			});
+		rimraf(`${path}/*`, async () => {
+			await fsp.mkdir(path, { recursive: true });
+			resolve();
 		});
 	});
 };
@@ -39,6 +39,7 @@ const main = async () => {
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap --no-markers`);
 		console.log(`\t${info.name} --from-data=./data --output-dir=./minimap-grid --overlay-grid`);
 		console.log(`\t${info.name} --from-data=./data --extra=achievements,orcsoberfest --output-dir=./minimap`);
+		console.log(`\t${info.name} --sort-markers=./data/markers.json`);
 		process.exit(1);
 	}
 
@@ -47,14 +48,35 @@ const main = async () => {
 		return process.exit(0);
 	}
 
-	if (!argv['from-minimap'] && !argv['from-data']) {
-		console.log('Missing `--from-minimap` or `--from-data` flag.');
+	const modes = [
+		argv['from-minimap'] && '--from-minimap',
+		argv['from-data'] && '--from-data',
+		argv['sort-markers'] && '--sort-markers',
+	].filter(Boolean);
+
+	if (modes.length === 0) {
+		console.log('Missing `--from-minimap`, `--from-data`, or `--sort-markers` flag.');
 		return process.exit(1);
 	}
 
-	if (argv['from-minimap'] && argv['from-data']) {
-		console.log('Cannot combine `--from-minimap` with `--from-data`. Pick one.');
+	if (modes.length > 1) {
+		console.log(`Cannot combine \`${modes[0]}\` with \`${modes[1]}\`. Pick one.`);
 		return process.exit(1);
+	}
+
+	if (argv['sort-markers']) {
+		if (argv['sort-markers'] === true) {
+			console.log('`--sort-markers` path not specified. Using the default, i.e. `data/markers.json`.');
+			argv['sort-markers'] = 'data/markers.json';
+		}
+		const files = Array.isArray(argv['sort-markers'])
+			? argv['sort-markers']
+			: [argv['sort-markers']];
+		for (const file of files) {
+			const targetPath = path.resolve(String(file));
+			await sortMarkersInFile(targetPath);
+		}
+		return;
 	}
 
 	if (argv['from-minimap']) {
